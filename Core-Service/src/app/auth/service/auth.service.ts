@@ -1,8 +1,9 @@
 import { SystemRole } from "../../user/enums";
-import { createUser, findUserByEmail, findUserExistsByEmailOrPhone } from "../../user/repository/users.repo";
-import type { LoginDTO, RegisterDTO } from "../dto/auth.dto";
-import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials } from "../errors";
-import { comparePassword, createAccessToken, createRefreshToken, hashPassword } from "../utils";
+import { createUser, findUserByEmail, findUserExistsByEmailOrPhone, updateUserPassword } from "../../user/repository/users.repo";
+import type { ResetPasswordDTO, ForgetPasswordDTO, LoginDTO, RegisterDTO } from "../dto/auth.dto";
+import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials, InvalidOTPError } from "../errors";
+import { createPasswordReset, findLatestPasswordResetByUserId, updatePasswordResetConsumedAt } from "../repository/password-reset.repo";
+import { comparePassword, createAccessToken, createRefreshToken, generateOTP, hashOTP, hashPassword } from "../utils";
 
 
 export class AuthService {
@@ -86,6 +87,57 @@ export class AuthService {
 
         }
     }
+
+    forgetPassword = async (data: ForgetPasswordDTO) => {
+        // check if user exists
+        const user = await findUserByEmail(data.email);
+        if (!user) {
+            return
+        }
+        // generate an otp
+        const otp = generateOTP();
+        // hash the otp
+        const hashedOtp = hashOTP(otp);
+        // insert the otp
+        await createPasswordReset({
+            userId: user.id,
+            otpHash: hashedOtp,
+            expiresAt: new Date(Date.now() + (10 * 60 * 1000)),
+            createdAt: new Date(),
+        }
+        )
+        // TODO: send email
+        console.log(`mocked email sent ${otp}`)
+    }
+
+    resetPassword = async (data: ResetPasswordDTO) => {
+        // find user
+        const user = await findUserByEmail(data.email);
+        if (!user) {
+            throw InvalidOTPError
+        }
+        // find reset password
+        const reset = await findLatestPasswordResetByUserId(user.id);
+        console.log(reset)
+        if (!reset) {
+            throw InvalidOTPError
+        }
+        // verify otp and expiry date
+        const inputOTPHash = hashOTP(data.otp)
+        console.log(inputOTPHash);
+        console.log(reset.otpHash);
+
+        console.log(reset.isExpired());
+        if (inputOTPHash != reset.otpHash || reset.isExpired()) {
+            throw InvalidOTPError
+        }
+        // update user password
+        const hashedPassword = await hashPassword(data.newPassword);
+        await updateUserPassword(user.id, hashedPassword);
+        // update reset password
+        await updatePasswordResetConsumedAt(reset.id)
+    }
+
 
 }
 

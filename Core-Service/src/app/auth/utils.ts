@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../../common/config/env";
+import crypto from "crypto";
 
 export async function hashPassword(password: string) {
     return bcrypt.hash(password, 10);
@@ -25,4 +26,12 @@ export function createRefreshToken(payload: JwtPayload): string {
 export function comparePassword(passwordInput: string, hashedPassword: string) : Promise<boolean> {
     return bcrypt.compare(passwordInput,
         hashedPassword);
+}
+
+export function generateOTP(): string {
+    return crypto.randomInt(100000,999999).toString()
+}
+
+export function hashOTP(otp: string) {
+    return crypto.createHash("sha256").update(otp).digest("hex");
 }

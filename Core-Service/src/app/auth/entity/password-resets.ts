@@ -1,18 +1,29 @@
+// password-resets.ts
+
+export interface PasswordResetProps {
+    id: number;
+    userId: number;
+    otpHash: string;
+    expiresAt: Date;
+    consumedAt: Date | null;
+    createdAt: Date;
+}
+
 export class PasswordReset {
     id: number;
     userId: number;
     otpHash: string;
     expiresAt: Date;
-    consumedAt: Date;
+    consumedAt: Date | null;
     createdAt: Date;
 
-    constructor(id: number, userId: number, otpHash: string, expiresAt: Date, consumedAt: Date, createdAt: Date) {
-        this.id = id;
-        this.userId = userId;
-        this.otpHash = otpHash;
-        this.expiresAt = expiresAt;
-        this.createdAt = createdAt;
-        this.consumedAt = consumedAt;
+    constructor(props: PasswordResetProps) {
+        this.id = props.id;
+        this.userId = props.userId;
+        this.otpHash = props.otpHash;
+        this.expiresAt = props.expiresAt;
+        this.consumedAt = props.consumedAt;
+        this.createdAt = props.createdAt;
     }
 
     isExpired(): boolean {

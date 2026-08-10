@@ -56,3 +56,11 @@ export async function updateUserPassword(id: number, password: string) {
     await db("users").where("id", id).
     update({password_hash: password});
 }
+
+export async function findUserById(id: number): Promise<User | undefined> {
+    const row = await db("users").select(
+        USER_COLUMNS
+    ).where("id", id).whereNull("deleted_at").first();
+
+    return row ? toEntity(row) : undefined;
+}

@@ -1,0 +1,4 @@
+import knex from "knex";
+export declare const db: knex.Knex<any, unknown[]>;
+export declare function pingDB(): Promise<void>;
+//# sourceMappingURL=knex.d.ts.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"20260808170323_create_users_table.js","sourceRoot":"","sources":["../../src/migrations/20260808170323_create_users_table.ts"],"names":[],"mappings":"AAGA,MAAM,CAAC,KAAK,UAAU,EAAE,CAAC,IAAU;IAC9B,MAAM,IAAI,CAAC,GAAG,CAAC;;;;;;;;;;;;;;;SAeX,CACJ,CAAA;AAEL,CAAC;AAGD,MAAM,CAAC,KAAK,UAAU,IAAI,CAAC,IAAU;IACjC,MAAM,IAAI,CAAC,GAAG,CAAC;;KAEd,CAAC,CAAA;AACN,CAAC"}

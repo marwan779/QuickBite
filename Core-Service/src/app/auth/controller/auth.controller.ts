@@ -1,24 +1,49 @@
-import type {Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { authService, type AuthService } from "../service/auth.service";
-import { RegisterDTO } from "../dto/auth.dto";
+import { LoginDTO, RegisterDTO } from "../dto/auth.dto";
 import { validateBody } from "../../../common/validation/validate";
 
 export class AuthController {
     constructor(private readonly authService: AuthService) {
     }
 
-    register = async(req: Request, res: Response, next: NextFunction) => {
-        try{
+    register = async (req: Request, res: Response, next: NextFunction) => {
+        try {
             // 1. validate req.body
             const data = await validateBody(RegisterDTO, req.body);
             // 2. call service
             const result = await this.authService.register(data);
             // 3. respond
             res.status(201).json(result);
-        } catch(err) {
+        } catch (err) {
             next(err);
         }
     }
+
+    login = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const data = await validateBody(LoginDTO, req.body);
+            const result = await this.authService.login(data);
+            res.cookie("access_token", result.accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 60 * 60 * 1000
+            })
+            res.cookie("refresh_token", result.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: '/api/auth/refresh'
+            })
+            res.status(200).json(result)
+        }
+        catch (err) {
+            next(err);
+        }
+    }
+
 }
+
+
 
 export const authController = new AuthController(authService);

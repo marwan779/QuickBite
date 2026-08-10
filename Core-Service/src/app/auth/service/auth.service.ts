@@ -1,24 +1,23 @@
 import { SystemRole } from "../../user/enums";
-import { createUser, findUserExistsByEmailOrPhone } from "../../user/repository/users.repo";
-import type { RegisterDTO } from "../dto/auth.dto";
-import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole } from "../errors";
-import { createAccessToken, createRefreshToken, hashPassword } from "../utils";
+import { createUser, findUserByEmail, findUserExistsByEmailOrPhone } from "../../user/repository/users.repo";
+import type { LoginDTO, RegisterDTO } from "../dto/auth.dto";
+import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials } from "../errors";
+import { comparePassword, createAccessToken, createRefreshToken, hashPassword } from "../utils";
 
 
 export class AuthService {
-    register = async(data: RegisterDTO )=> {
+    register = async (data: RegisterDTO) => {
         if (data.role == SystemRole.SYSTEM_ADMIN) {
             throw CannotSignupAsSystemAdmin
         }
-        if (!Object.values(SystemRole).includes(data.role as SystemRole))
-        {
+        if (!Object.values(SystemRole).includes(data.role as SystemRole)) {
             throw InvalidRole;
         }
         // 1. check if user exists by email
         const existing = await findUserExistsByEmailOrPhone(data.email, data.phone);
 
         // 2. if exists we throw an error
-        if(existing) {
+        if (existing) {
             throw UserAlreadyExistsError
         }
         // 3. hashPassword
@@ -37,12 +36,13 @@ export class AuthService {
         })
 
         // 5. create access token , refresh token
-        const payload = {userId: user.id, role: data.role, email: user.email};
+        const payload = { userId: user.id, role: data.role, email: user.email };
         const accessToken = createAccessToken(payload);
         const refreshToken = createRefreshToken(payload);
 
         // 6. return tokens and user data
         return {
+            message: "successfully registered user",
             accessToken,
             refreshToken,
             user: {
@@ -53,6 +53,44 @@ export class AuthService {
             }
         }
     }
+
+
+    login = async (data: LoginDTO) => {
+        // find the user by email input
+        const user = await findUserByEmail(data.email);
+        if (!user) {
+            throw IncorrectCredentials
+        }
+        // compare passwords
+        const match = await comparePassword(data.password, user.passwordHash)
+        // if passwords doesnt match throw err
+        if (!match) {
+            throw IncorrectCredentials
+        }
+        // generate tokens
+        const payload = { userId: user.id, role: user.systemRole, email: user.email };
+        const accessToken = createAccessToken(payload);
+        const refreshToken = createRefreshToken(payload);
+        // return the data
+        return {
+            message: "Login successful",
+            accessToken,
+            refreshToken,
+            user: {
+                id: user.id,
+                email: user.email,
+                phone: user.phone,
+                systemRole: user.systemRole,
+                createdAt: user.createdAt,
+            }
+
+        }
+    }
+
 }
+
+
+
+
 
 export const authService = new AuthService();

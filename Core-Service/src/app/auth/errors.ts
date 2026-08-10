@@ -5,3 +5,9 @@ export const UserAlreadyExistsError = new AppError('User Already Exists with sam
 export const CannotSignupAsSystemAdmin = new AppError('You cannot register as a system admin', 403);
 
 export const InvalidRole = new AppError('Invalid role. Please provide a valid system role.', 400);
+
+
+export const IncorrectCredentials = new AppError(
+  'Incorrect email or password',
+  401
+);

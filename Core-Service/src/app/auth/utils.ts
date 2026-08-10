@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../../common/config/env";
 
-export async function hashPassword (password:string) {
+export async function hashPassword(password: string) {
     return bcrypt.hash(password, 10);
 }
 
@@ -12,12 +12,17 @@ export interface JwtPayload {
     role: string;
 }
 
-export function createAccessToken(payload: JwtPayload) : string {
-    const options : SignOptions = {expiresIn: Number(env.jwt.accessExpiresIn)}
-    return jwt.sign(payload,env.jwt.accessSecret, options);
+export function createAccessToken(payload: JwtPayload): string {
+    const options: SignOptions = { expiresIn: Number(env.jwt.accessExpiresIn) }
+    return jwt.sign(payload, env.jwt.accessSecret, options);
 }
 
-export function createRefreshToken(payload: JwtPayload) : string {
-    const options : SignOptions = {expiresIn: Number(env.jwt.refreshExpiresIn)}
-    return jwt.sign(payload,env.jwt.refreshSecret, options);
+export function createRefreshToken(payload: JwtPayload): string {
+    const options: SignOptions = { expiresIn: Number(env.jwt.refreshExpiresIn) }
+    return jwt.sign(payload, env.jwt.refreshSecret, options);
+}
+
+export function comparePassword(passwordInput: string, hashedPassword: string) : Promise<boolean> {
+    return bcrypt.compare(passwordInput,
+        hashedPassword);
 }

@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { authService, type AuthService } from "../service/auth.service";
 import { ForgetPasswordDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from "../dto/auth.dto";
 import { validateBody } from "../../../common/validation/validate";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../../common/cookies/cookies";
 
 export class AuthController {
     constructor(private readonly authService: AuthService) {
@@ -24,47 +25,48 @@ export class AuthController {
         try {
             const data = await validateBody(LoginDTO, req.body);
             const result = await this.authService.login(data);
-            res.cookie("access_token", result.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 60 * 60 * 1000
-            })
-            res.cookie("refresh_token", result.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-                path: '/api/auth/refresh'
-            })
-            res.status(200).json(result)
-        }
-        catch (err) {
+
+            res.cookie(
+                "access_token",
+                result.accessToken,
+                accessTokenCookieOptions
+            );
+
+            res.cookie(
+                "refresh_token",
+                result.refreshToken,
+                refreshTokenCookieOptions
+            );
+
+            res.status(200).json(result);
+        } catch (err) {
             next(err);
         }
     }
 
 
-    forgetPassword = async(req: Request, res: Response, next: NextFunction) => {
-        try{
+    forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
+        try {
             const data = await validateBody(ForgetPasswordDTO, req.body);
             await this.authService.forgetPassword(data);
             res.status(200).json({
                 "message": "Email Sent with OTP",
             })
         }
-        catch(err) {
+        catch (err) {
             next(err);
         }
     }
 
-    resetPassword = async(req: Request, res: Response, next: NextFunction) => {
-        try{
+    resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+        try {
             const data = await validateBody(ResetPasswordDTO, req.body);
             await this.authService.resetPassword(data);
             res.status(200).json({
                 "message": "Password reset successfully, please login again",
             })
         }
-        catch(err) {
+        catch (err) {
             next(err);
         }
     }

@@ -1,9 +1,9 @@
 import { SystemRole } from "../../user/enums";
 import { createUser, findUserByEmail, findUserExistsByEmailOrPhone, updateUserPassword } from "../../user/repository/users.repo";
 import type { ResetPasswordDTO, ForgetPasswordDTO, LoginDTO, RegisterDTO } from "../dto/auth.dto";
-import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials, InvalidOTPError } from "../errors";
+import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials, InvalidOTPError, InvalidRefreshTokenError } from "../errors";
 import { createPasswordReset, findLatestPasswordResetByUserId, updatePasswordResetConsumedAt } from "../repository/password-reset.repo";
-import { comparePassword, createAccessToken, createRefreshToken, generateOTP, hashOTP, hashPassword } from "../utils";
+import { comparePassword, createAccessToken, createRefreshToken, generateOTP, hashOTP, hashPassword, verifyRefreshToken } from "../utils";
 
 
 export class AuthService {
@@ -139,6 +139,23 @@ export class AuthService {
     }
 
 
+    refresh = async (refreshToken: string) => {
+        try {
+            const payload = verifyRefreshToken(refreshToken);
+
+            const accessToken = createAccessToken({
+                userId: payload.userId,
+                email: payload.email,
+                role: payload.role,
+            });
+
+            return {
+                accessToken,
+            };
+        } catch (err) {
+            throw InvalidRefreshTokenError;
+        }
+    }
 }
 
 

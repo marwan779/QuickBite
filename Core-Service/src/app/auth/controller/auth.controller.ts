@@ -10,12 +10,25 @@ export class AuthController {
 
     register = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // 1. validate req.body
             const data = await validateBody(RegisterDTO, req.body);
-            // 2. call service
             const result = await this.authService.register(data);
-            // 3. respond
-            res.status(201).json(result);
+
+            res.cookie(
+                "access_token",
+                result.accessToken,
+                accessTokenCookieOptions
+            );
+
+            res.cookie(
+                "refresh_token",
+                result.refreshToken,
+                refreshTokenCookieOptions
+            );
+
+            res.status(201).json({
+                message: result.message,
+                user: result.user,
+            });
         } catch (err) {
             next(err);
         }
@@ -38,7 +51,31 @@ export class AuthController {
                 refreshTokenCookieOptions
             );
 
-            res.status(200).json(result);
+            res.status(200).json({
+                message: result.message,
+                user: result.user,
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+
+    refresh = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const refreshToken = req.cookies.refresh_token;
+
+            const result = await this.authService.refresh(refreshToken);
+
+            res.cookie(
+                "access_token",
+                result.accessToken,
+                accessTokenCookieOptions
+            );
+
+            res.status(200).json({
+                message: "success",
+            });
         } catch (err) {
             next(err);
         }
@@ -70,7 +107,6 @@ export class AuthController {
             next(err);
         }
     }
-
 
 }
 

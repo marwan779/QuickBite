@@ -15,3 +15,8 @@ export const IncorrectCredentials = new AppError(
 export const InvalidOTPError = new AppError('Invalid OTP', 401);
 
 export const NotAuthenticated = new AppError('Not authenticated', 403);
+
+export const InvalidRefreshTokenError = new AppError(
+    "Invalid or expired refresh token",
+    401
+);

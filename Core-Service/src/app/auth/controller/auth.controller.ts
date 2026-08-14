@@ -28,6 +28,7 @@ export class AuthController {
             res.status(201).json({
                 message: result.message,
                 user: result.user,
+                restaurant: result.restaurant
             });
         } catch (err) {
             next(err);

@@ -20,3 +20,5 @@ export const InvalidRefreshTokenError = new AppError(
     "Invalid or expired refresh token",
     401
 );
+
+export const RestaurantDataRequiredError = new AppError('Restaurant data is required', 400);

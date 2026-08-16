@@ -35,6 +35,8 @@ export async function validateBody<T extends object>(
     cls: new () => T,
     body: unknown
 ): Promise<T> {
+
+
     const instance = plainToInstance(cls, body);
 
     const errors = await validate(instance, {

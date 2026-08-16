@@ -8,7 +8,7 @@ import {
     UpdateCustomerAddressDTO,
 } from "../dto/address.dto";
 import { validateBody } from "../../../common/validation/validate";
-import { NotAuthenticated } from "../../auth/errors";
+import { NotAuthenticated } from "../../../common/auth/error";
 
 
 export class CustomerAddressController {

@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import {db} from "../../../common/knex/knex";
 import { RestaurantEntity } from "../entity/restaurant";
+import { RestaurantStatus } from "../enums";
 
 const RESTAURANT_COLUMNS = ['id','owner_id','name', 'logo_url','status','primary_country'
     ,'created_at','updated_at','status_updated_at'];
@@ -25,8 +26,31 @@ export async function findAllRestaurants(): Promise<RestaurantEntity[]> {
     return rows.map(toEntity);
 }
 
-export async function findRestaurantById(id: number): Promise<RestaurantEntity> {
+export async function findRestaurantById(id: number): Promise<RestaurantEntity | undefined> {
     const row = await db("restaurants").select(RESTAURANT_COLUMNS).where("id", id).first();
+    return row ? toEntity(row) : undefined;
+}
+
+export async function updateRestaurant(id: number, data: Partial<RestaurantEntity>, conn: Knex = db): Promise<RestaurantEntity> {
+    const [row] = await conn("restaurants")
+        .where("id", id)
+        .update({
+            ...data,
+            updated_at: new Date(),
+        })
+        .returning(RESTAURANT_COLUMNS);
+    return toEntity(row);
+}
+
+export async function updateRestaurantStatus(id: number, status: RestaurantStatus, conn: Knex = db): Promise<RestaurantEntity> {
+    const [row] = await conn("restaurants")
+        .where("id", id)
+        .update({
+            status,
+            status_updated_at: new Date(),
+            updated_at: new Date(),
+        })
+        .returning(RESTAURANT_COLUMNS);
     return toEntity(row);
 }
 

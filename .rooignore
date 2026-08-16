@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+
+# Dependencies / generated files
+node_modules/
+dist/
+build/
+
+# Git internals
+.git/

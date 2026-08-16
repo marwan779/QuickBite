@@ -1,8 +1,8 @@
-import { UnAuthorisedError } from "../../../common/auth/error";
+import { UnAuthorisedError, NotFoundError } from "../../../common/auth/error";
 import {findRestaurantById} from "../../restaurant/repository/restaurant.repo";
 import {SystemRole} from "../../user/enums";
-import type { CreateBranchDTO } from "../dto/branch.dto";
-import {findNearbyBranches, createBranch} from "../repository/branch.repository";
+import type { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";
+import {findNearbyBranches, createBranch, findBranchesByRestaurant, findBranchById, updateBranch, updateBranchStatus} from "../repository/branch.repository";
 
 export class BranchService {
 
@@ -13,8 +13,8 @@ export class BranchService {
 
     create = async (restaurantId: number, userId: number, userRole: SystemRole, data: CreateBranchDTO) => {
         const restaurant = await findRestaurantById(restaurantId);
+        if (!restaurant) throw NotFoundError;
 
-        // if the logged in user is nto system admin and not the owner of restaurant then throw unauthorised err
         if(userRole != SystemRole.SYSTEM_ADMIN && (Number(restaurant.ownerId) !== Number(userId)) ){
             throw UnAuthorisedError
         }
@@ -39,6 +39,38 @@ export class BranchService {
         });
 
         return branch;
+    }
+
+    findByRestaurant = async (restaurantId: number) => {
+        const restaurant = await findRestaurantById(restaurantId);
+        if (!restaurant) throw NotFoundError;
+        return findBranchesByRestaurant(restaurantId);
+    }
+
+    update = async (branchId: number, userId: number, userRole: SystemRole, data: UpdateBranchDTO) => {
+        const branch = await findBranchById(branchId);
+        if (!branch) throw NotFoundError;
+
+        const restaurant = await findRestaurantById(branch.restaurantId);
+        if (!restaurant) throw NotFoundError;
+        if(userRole != SystemRole.SYSTEM_ADMIN && (Number(restaurant.ownerId) !== Number(userId)) ){
+            throw UnAuthorisedError
+        }
+
+        return updateBranch(branchId, data);
+    }
+
+    updateStatus = async (branchId: number, userId: number, userRole: SystemRole, data: UpdateBranchStatusDTO) => {
+        const branch = await findBranchById(branchId);
+        if (!branch) throw NotFoundError;
+
+        const restaurant = await findRestaurantById(branch.restaurantId);
+        if (!restaurant) throw NotFoundError;
+        if(userRole != SystemRole.SYSTEM_ADMIN && (Number(restaurant.ownerId) !== Number(userId)) ){
+            throw UnAuthorisedError
+        }
+
+        return updateBranchStatus(branchId, data.isActive);
     }
 }
 

@@ -4,6 +4,7 @@ import { RestaurantStatus } from "../enums";
 import { createRestaurant, findAllRestaurants, findRestaurantById, updateRestaurant, updateRestaurantStatus } from "../repository/restaurant.repo";
 import { RestaurantEntity } from "../entity/restaurant";
 import { AppError } from "../../../common/error/AppError";
+import { NotFoundError } from "../../../common/auth/error";
 
 export class RestaurantService {
 
@@ -37,7 +38,7 @@ export class RestaurantService {
     findById = async (id: number) => {
         const restaurant = await findRestaurantById(id);
         if (!restaurant) {
-            throw new AppError("Restaurant not found", 404);
+            throw NotFoundError;
         }
         return restaurant;
     };
@@ -45,7 +46,7 @@ export class RestaurantService {
     update = async (id: number, data: Partial<RestaurantEntity>) => {
         const restaurant = await findRestaurantById(id);
         if (!restaurant) {
-            throw new AppError("Restaurant not found", 404);
+            throw NotFoundError;
         }
         const updated = await updateRestaurant(id, data);
         return updated;
@@ -54,7 +55,7 @@ export class RestaurantService {
     updateStatus = async (id: number, status: RestaurantStatus) => {
         const restaurant = await findRestaurantById(id);
         if (!restaurant) {
-            throw new AppError("Restaurant not found", 404);
+            throw NotFoundError;
         }
         const updated = await updateRestaurantStatus(id, status);
         return updated;

@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { productController } from "./controller/product.controller";
 import { authenticate } from "../../common/auth/gaurd";
+import { rbac, requireBranchAccess, requireRestaurantMember } from "../../common/auth/rbac";
 
 
 
@@ -43,6 +44,29 @@ productRouter.post(
 productRouter.patch(
     "/products/:id",
     authenticate,
+    productController.update
+);
+
+productRouter.get("/restaurants/:restaurantId/products",
+    authenticate,
+    requireRestaurantMember('restaurantId'),
+    rbac({resource:"core:product", action:"read"}),
+    productController.findByRestaurant
+);
+
+productRouter.post("/restaurants/:restaurantId/products",
+    authenticate,
+    requireRestaurantMember('restaurantId'),
+    rbac({resource:"core:product", action:"create"}),
+    productController.create
+);
+
+productRouter.patch("/products/:id",
+    authenticate,
+    // Assuming product payload contains branchId or route is adjusted. If the route is just /:id, ensure requireBranchAccess knows how to find the branchId (maybe from DB inside controller, or pass it in body if applicable). 
+    // Homework specifies: add requireBranchAccess('branchId')
+    requireBranchAccess('branchId'), 
+    rbac({resource:"core:product", action:"update"}),
     productController.update
 );
 

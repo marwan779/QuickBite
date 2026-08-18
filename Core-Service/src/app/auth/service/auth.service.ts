@@ -1,57 +1,66 @@
 import { db } from "../../../common/knex/knex";
 import { restaurantService, type RestaurantService } from "../../restaurant/service/restaurant.service";
+import { findBranchIdsByMemberId } from "../../role-based-access-control/repository/member-branch.repo";
+import { activateMemberByUserId, findRestaurantMemberWithRole } from "../../role-based-access-control/repository/restaurant_member.repo";
+import { MemberService, memberService } from "../../role-based-access-control/service/member.service";
 import { SystemRole } from "../../user/enums";
-import { createUser, findUserByEmail, findUserExistsByEmailOrPhone, updateUserPassword } from "../../user/repository/users.repo";
+import {  findUserByEmail,  updateUserPassword } from "../../user/repository/users.repo";
+import { UserService, userService } from "../../user/service/user.service";
 import type { ResetPasswordDTO, ForgetPasswordDTO, LoginDTO, RegisterDTO } from "../dto/auth.dto";
-import { CannotSignupAsSystemAdmin, UserAlreadyExistsError, InvalidRole, IncorrectCredentials, InvalidOTPError, InvalidRefreshTokenError, RestaurantDataRequiredError } from "../errors";
+import { CannotSignupAsSystemAdmin, InvalidRole, IncorrectCredentials, InvalidOTPError, InvalidRefreshTokenError, RestaurantDataRequiredError } from "../errors";
 import { createPasswordReset, findLatestPasswordResetByUserId, updatePasswordResetConsumedAt } from "../repository/password-reset.repo";
 import { comparePassword, createAccessToken, createRefreshToken, generateOTP, hashOTP, hashPassword, verifyRefreshToken } from "../utils";
 
 
 export class AuthService {
 
-    constructor(private readonly restaurantService: RestaurantService) {
+    constructor(private readonly restaurantService: RestaurantService, private readonly userService: UserService, private readonly memberService: MemberService) {
     }
 
-    register = async (data: RegisterDTO) => {
+  register = async (data: RegisterDTO) => {
         if (data.role == SystemRole.SYSTEM_ADMIN) {
-            throw CannotSignupAsSystemAdmin
+            throw CannotSignupAsSystemAdmin;
         }
         if (!Object.values(SystemRole).includes(data.role as SystemRole)) {
             throw InvalidRole;
         }
-        // 1. check if user exists by email
-        const existing = await findUserExistsByEmailOrPhone(data.email, data.phone);
 
-        // 2. if exists we throw an error
-        if (existing) {
-            throw UserAlreadyExistsError
-        }
-        // 3. hashPassword
-        const hashedPassword = await hashPassword(data.password);
-
-        // 4. create user
-        const now = new Date();
         const trx = await db.transaction();
-        let user
-        let restaurant
+        let user;
+        let restaurant;
+        
+        // Define outside the try block so it's accessible when building the JWT payload
+        let restaurantMemberInfo = null;
+
         try {
-             user = await createUser({
+            // 1. Centralize user creation
+            // (Duplicate checks, password hashing, and DB insertion are now handled in UserService)
+            user = await this.userService.create({
                 email: data.email,
                 phone: data.phone,
                 name: data.name,
-                passwordHash: hashedPassword,
-                systemRole: data.role,
-                createdAt: now,
-                updatedAt: now,
-            }, trx)
+                password: data.password, 
+                systemRole: data.role as SystemRole,
+            }, trx);
 
-            // check if the type of user is restaurant, then call restaurant service to create a new restaurant
+            // 2. Handle restaurant specific creation logic
             if (data.role == SystemRole.RESTAURANT_USER) {
                 if (data.restaurant == undefined) {
                     throw RestaurantDataRequiredError;
                 }
-                restaurant = await this.restaurantService.create(user.id, data.restaurant, trx)
+                
+                // Create the restaurant
+                restaurant = await this.restaurantService.create(user.id, data.restaurant, trx);
+                
+                // Create the missing owner member record (Homework Fix)
+                await this.memberService.createOwnerMember(restaurant.id, user.id, trx);
+                
+                // Build the extra JWT payload info
+                restaurantMemberInfo = {
+                    restaurantId: restaurant.id,
+                    restaurantRole: 'owner',
+                    branchIds: []
+                };
             }
 
             await trx.commit();
@@ -60,14 +69,17 @@ export class AuthService {
             throw error;
         }
 
-
-
-        // 5. create access token , refresh token
-        const payload = { userId: user.id, role: data.role, email: user.email };
+        // 3. Create access token & refresh token, spreading in the restaurant info if it exists
+        const payload = { 
+            userId: user.id, 
+            role: data.role, 
+            email: user.email, 
+            ...(restaurantMemberInfo && restaurantMemberInfo) 
+        };
         const accessToken = createAccessToken(payload);
         const refreshToken = createRefreshToken(payload);
 
-        // 6. return tokens and user data
+        // 4. Return tokens and user data
         return {
             message: "successfully registered user",
             accessToken,
@@ -79,7 +91,7 @@ export class AuthService {
                 systemRole: user.systemRole,
             },
             restaurant
-        }
+        };
     }
 
 
@@ -95,8 +107,24 @@ export class AuthService {
         if (!match) {
             throw IncorrectCredentials
         }
+        
+
+        let restaurantMemberInfo = null
+        if(user.systemRole == SystemRole.RESTAURANT_USER) {
+            const memberData =  await findRestaurantMemberWithRole(user.id);
+            const branchIds = await findBranchIdsByMemberId(memberData.member.id);
+            if(memberData)  {
+                restaurantMemberInfo = {
+                    restaurantId: memberData.member.restaurantId,
+                    restaurantRole: memberData.roleName,
+                    branchIds
+                }
+            }
+        }
+
+
         // generate tokens
-        const payload = { userId: user.id, role: user.systemRole, email: user.email };
+        const payload = {userId: user.id, role: user.systemRole, email: user.email, ...restaurantMemberInfo};
         const accessToken = createAccessToken(payload);
         const refreshToken = createRefreshToken(payload);
         // return the data
@@ -131,13 +159,13 @@ export class AuthService {
             otpHash: hashedOtp,
             expiresAt: new Date(Date.now() + (10 * 60 * 1000)),
             createdAt: new Date(),
-        }
+        }, 
         )
         // TODO: send email
         console.log(`mocked email sent ${otp}`)
     }
 
-    resetPassword = async (data: ResetPasswordDTO) => {
+    resetPassword =  async(data: ResetPasswordDTO ) => {
         // find user
         const user = await findUserByEmail(data.email);
         if (!user) {
@@ -145,17 +173,13 @@ export class AuthService {
         }
         // find reset password
         const reset = await findLatestPasswordResetByUserId(user.id);
-        console.log(reset)
-        if (!reset) {
+        if(!reset) {
             throw InvalidOTPError
         }
         // verify otp and expiry date
         const inputOTPHash = hashOTP(data.otp)
-        console.log(inputOTPHash);
-        console.log(reset.otpHash);
 
-        console.log(reset.isExpired());
-        if (inputOTPHash != reset.otpHash || reset.isExpired()) {
+        if(inputOTPHash != reset.otpHash || reset.isExpired() ) {
             throw InvalidOTPError
         }
         // update user password
@@ -163,7 +187,10 @@ export class AuthService {
         await updateUserPassword(user.id, hashedPassword);
         // update reset password
         await updatePasswordResetConsumedAt(reset.id)
+
+        return user;
     }
+
 
 
     refresh = async (refreshToken: string) => {
@@ -183,10 +210,16 @@ export class AuthService {
             throw InvalidRefreshTokenError;
         }
     }
+
+    acceptInvite = async(data: ResetPasswordDTO )=> {
+        const user = await this.resetPassword(data)
+        // activate member
+        await activateMemberByUserId(user.id)
+    }
 }
 
 
 
 
 
-export const authService = new AuthService(restaurantService);
+export const authService = new AuthService(restaurantService, userService, memberService);

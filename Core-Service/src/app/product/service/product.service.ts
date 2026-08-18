@@ -14,6 +14,7 @@ import { SystemRole } from "../../user/enums";
 import { createCategory, findCategoriesByRestaurant, findCategoryByName } from "../repo/category.repository";
 import { createProduct, findProductById, findProductsByBranch, findProductsByRestaurant, updateProduct } from "../repo/product.repository";
 import { findBranchDetails, updateBranchDetails } from "../repo/product-branch-details.repository";
+import { NotAuthorizedErrorToManageRestaurant } from "../../role-based-access-control/errors";
 
 export class ProductService {
 
@@ -212,9 +213,7 @@ export class ProductService {
             await this.restaurantService.findById(restaurantId);
 
         if (!restaurant || restaurant.ownerId !== userId) {
-            throw new Error(
-                "You are not authorized to manage this restaurant"
-            );
+            throw NotAuthorizedErrorToManageRestaurant;
         }
     };
 }

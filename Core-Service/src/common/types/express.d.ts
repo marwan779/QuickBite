@@ -5,7 +5,11 @@ declare namespace Express {
         user?: {
             userId: number,
             role: string,
-            email: string
+            email: string,
+            // for restaurant users only
+            restaurantId?: number;
+            restaurantRole?: string;
+            branchIds?: number[];
         }
     }
 }

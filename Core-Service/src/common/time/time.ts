@@ -1,22 +1,12 @@
-const secondsToMs = (seconds: number): number => {
-    return seconds * 1000;
+type TimeUnit = 'd' | 'h' | 'm' | 's';
+
+const multipliers: Record<TimeUnit, number> = {
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
 };
 
-const minutesToMs = (minutes: number): number => {
-    return minutes * 60 * 1000;
-};
-
-const hoursToMs = (hours: number): number => {
-    return hours * 60 * 60 * 1000;
-};
-
-const daysToMs = (days: number): number => {
-    return days * 24 * 60 * 60 * 1000;
-};
-
-export {
-    secondsToMs,
-    minutesToMs,
-    hoursToMs,
-    daysToMs,
-};
+export function toMs(value: number, unit: TimeUnit): number {
+    return value * multipliers[unit];
+}

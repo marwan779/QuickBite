@@ -1,5 +1,5 @@
 import type { Knex } from "knex";
-import {db} from "../../../common/knex/knex";
+import {db} from "../../../lib/knex/knex";
 import { RestaurantEntity } from "../entity/restaurant";
 import { RestaurantStatus } from "../enums";
 

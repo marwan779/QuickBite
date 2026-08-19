@@ -1,7 +1,7 @@
 import {Router} from "express";
-import {requireRestaurantMember, rbac} from "../../common/auth/rbac";
+import {requireRestaurantMember, rbac} from "../../lib/auth/rbac";
 import {memberController} from "./controller/member.controller";
-import { authenticate } from "../../common/auth/gaurd";
+import { authenticate } from "../../lib/auth/gaurd";
 
 export const rbacRouter = Router();
 

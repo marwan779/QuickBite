@@ -1,6 +1,6 @@
 import type { Knex } from "knex";
-import { db } from "../../../common/knex/knex";
-import { toMs } from "../../../common/time/time";
+import { db } from "../../../lib/knex/knex";
+import { toMs } from "../../../pkg/utils/time";
 import { createPasswordReset } from "../../auth/repository/password-reset.repo";
 import { generateOTP, hashOTP } from "../../auth/utils";
 import { SystemRole } from "../../user/enums";
@@ -17,7 +17,7 @@ import {
     NotAuthorizedErrorToManageRestaurant,
     NotAuthorizedErrorToManageBranches
 } from "../errors";
-import { AppError } from "../../../common/error/AppError";
+import { AppError } from "../../../lib/error/AppError";
 import {
     setMemberBranches,
     countBranchesByIdsAndRestaurant

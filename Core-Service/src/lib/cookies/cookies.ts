@@ -1,4 +1,4 @@
-import { toMs } from "../time/time";
+import { toMs } from "../../pkg/utils/time";
 
 export const accessTokenCookieOptions = {
     httpOnly: true,

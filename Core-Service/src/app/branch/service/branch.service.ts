@@ -1,4 +1,4 @@
-import { UnAuthorisedError, NotFoundError } from "../../../common/auth/error";
+import { UnAuthorisedError, NotFoundError } from "../../../lib/auth/error";
 import {findRestaurantById} from "../../restaurant/repository/restaurant.repo";
 import {SystemRole} from "../../user/enums";
 import type { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";

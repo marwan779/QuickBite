@@ -14,8 +14,8 @@ import {
     UpdateProductDTO,
 } from "../dto/product.dto";
 
-import { validateBody } from "../../../common/validation/validate";
-import { NotAuthenticated } from "../../../common/auth/error";
+import { validateBody } from "../../../lib/validation/validate";
+import { NotAuthenticated } from "../../../lib/auth/error";
 
 
 

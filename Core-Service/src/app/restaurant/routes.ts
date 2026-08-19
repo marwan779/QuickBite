@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { restaurantController } from "./controller/restaurant.controller";
-import { authenticate } from "../../common/auth/gaurd";
-import { authorize } from "../../common/auth/authorize";
+import { authenticate } from "../../lib/auth/gaurd";
+import { authorize } from "../../lib/auth/authorize";
 import { SystemRole } from "../user/enums";
 
 export const restaurantRouter = Router();

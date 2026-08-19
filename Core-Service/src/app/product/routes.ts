@@ -1,8 +1,8 @@
 import { Router } from "express";
 
 import { productController } from "./controller/product.controller";
-import { authenticate } from "../../common/auth/gaurd";
-import { rbac, requireBranchAccess, requireRestaurantMember } from "../../common/auth/rbac";
+import { authenticate } from "../../lib/auth/gaurd";
+import { rbac, requireBranchAccess, requireRestaurantMember } from "../../lib/auth/rbac";
 
 
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { userController } from "./controller/user.controller";
-import { authenticate } from "../../common/auth/gaurd";
+import { authenticate } from "../../lib/auth/gaurd";
 
 export const userRouter = Router();
 

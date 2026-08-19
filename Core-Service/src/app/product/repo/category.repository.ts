@@ -1,4 +1,4 @@
-import { db } from "../../../common/knex/knex";
+import { db } from "../../../lib/knex/knex";
 
 
 export const findCategoriesByRestaurant = async (

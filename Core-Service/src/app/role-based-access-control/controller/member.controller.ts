@@ -1,5 +1,5 @@
 import type {Request, Response, NextFunction } from "express";
-import {validateBody} from "../../../common/validation/validate";
+import {validateBody} from "../../../lib/validation/validate";
 import {CreateMemberDTO, UpdateMemberBranchesDTO, UpdateMemberDTO} from "../dto/member.dto";
 import {memberService} from "../service/member.service";
 

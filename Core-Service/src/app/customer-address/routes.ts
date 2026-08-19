@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate } from "../../common/auth/gaurd";
+import { authenticate } from "../../lib/auth/gaurd";
 import { customerAddressController } from "./controller/customer-address.controller";
 
 const customerAddressRouter = Router();

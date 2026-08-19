@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { RestaurantService, restaurantService } from "../service/restaurant.service";
-import { validateBody } from "../../../common/validation/validate";
+import { validateBody } from "../../../lib/validation/validate";
 import { CreateRestaurantDTO, UpdateRestaurantDTO, UpdateRestaurantStatusDTO } from "../dto/restaurant.dto";
 
 export class RestaurantController {

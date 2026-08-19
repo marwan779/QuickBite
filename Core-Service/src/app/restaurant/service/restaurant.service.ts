@@ -3,8 +3,8 @@ import { RegisterRestaurantDTO } from "../../auth/dto/auth.dto";
 import { RestaurantStatus } from "../enums";
 import { createRestaurant, findAllRestaurants, findRestaurantById, updateRestaurant, updateRestaurantStatus } from "../repository/restaurant.repo";
 import { RestaurantEntity } from "../entity/restaurant";
-import { AppError } from "../../../common/error/AppError";
-import { NotFoundError } from "../../../common/auth/error";
+import { AppError } from "../../../lib/error/AppError";
+import { NotFoundError } from "../../../lib/auth/error";
 
 export class RestaurantService {
 

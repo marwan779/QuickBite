@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { SystemRole } from "../../user/enums";
 import { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";
 import { branchService, type BranchService } from "../service/branch.service";
-import { validateBody } from "../../../common/validation/validate";
+import { validateBody } from "../../../lib/validation/validate";
 
 export class BranchController {
     constructor(private readonly branchService: BranchService) {

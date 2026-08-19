@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { authService, type AuthService } from "../service/auth.service";
 import { ForgetPasswordDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from "../dto/auth.dto";
-import { validateBody } from "../../../common/validation/validate";
-import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../../common/cookies/cookies";
+import { validateBody } from "../../../lib/validation/validate";
+import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../../lib/cookies/cookies";
 
 export class AuthController {
     constructor(private readonly authService: AuthService) {

@@ -1,7 +1,7 @@
 import express from "express";
 import { routes } from "./routes";
-import { correlationId } from "./common/correlation/correlationId";
-import { errorHandler } from "./common/error/errorHandler";
+import { correlationId } from "./lib/correlation/correlationId";
+import { errorHandler } from "./lib/error/errorHandler";
 import cookieParser from "cookie-parser";
 
 

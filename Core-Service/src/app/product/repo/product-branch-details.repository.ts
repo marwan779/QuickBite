@@ -1,5 +1,5 @@
 
-import { db } from "../../../common/knex/knex";
+import { db } from "../../../lib/knex/knex";
 import type {
     UpdateProductDTO,
 } from "../dto/product.dto";

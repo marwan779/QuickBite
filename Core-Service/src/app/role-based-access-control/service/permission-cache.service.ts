@@ -1,4 +1,4 @@
-import { toMs } from "../../../common/time/time";
+import { toMs } from "../../../pkg/utils/time";
 import {getPermissionsByRoleName} from "../repository/permission.repo";
 
 class PermissionCacheService {

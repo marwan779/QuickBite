@@ -1,4 +1,4 @@
-import { db } from "../../../common/knex/knex";
+import { db } from "../../../lib/knex/knex";
 import { restaurantService, type RestaurantService } from "../../restaurant/service/restaurant.service";
 import { findBranchIdsByMemberId } from "../../role-based-access-control/repository/member-branch.repo";
 import { activateMemberByUserId, findRestaurantMemberWithRole } from "../../role-based-access-control/repository/restaurant_member.repo";

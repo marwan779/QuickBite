@@ -1,7 +1,12 @@
 import { Router } from "express";
-import { branchController} from "./controller/branch.controller";
+import { BranchController} from "./controller/branch.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { rbac, requireBranchAccess, requireRestaurantMember } from "../../lib/auth/rbac";
+import { container } from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+
+const branchController = container.resolve<BranchController>(TOKENS.BranchController);
+
 
 export const branchRouter = Router();
 

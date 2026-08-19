@@ -14,10 +14,8 @@ import {
     RoleNotFoundError,
     MemberNotFoundError,
     CannotDeleteOwnerError,
-    NotAuthorizedErrorToManageRestaurant,
     NotAuthorizedErrorToManageBranches
 } from "../errors";
-import { AppError } from "../../../lib/error/AppError";
 import {
     setMemberBranches,
     countBranchesByIdsAndRestaurant
@@ -32,10 +30,14 @@ import {
 import { findRoleByName } from "../repository/role.repo";
 import { getPermissionsDetailsByRoleName } from "../repository/permission.repo";
 import { BranchesNotBelongToRestaurantError } from "../../branch/error";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../../../lib/di/tokens";
 
+
+@injectable()
 export class MemberService {
     // 1. Inject the userService into the constructor for proper layering
-    constructor(private readonly userServiceImpl = userService) { }
+    constructor(@inject(TOKENS.UserService) private readonly userServiceImpl = userService) { }
 
     // =========================================================
     // CREATION METHODS
@@ -235,4 +237,3 @@ export class MemberService {
     }
 }
 
-export const memberService = new MemberService();

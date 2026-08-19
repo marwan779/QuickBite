@@ -1,6 +1,11 @@
 import { Router } from "express";
 import { authenticate } from "../../lib/auth/gaurd";
-import { customerAddressController } from "./controller/customer-address.controller";
+import { CustomerAddressController} from "./controller/customer-address.controller";
+import { TOKENS } from "../../lib/di/tokens";
+import { container } from "../../lib/di/container";
+
+const customerAddressController = container.resolve<CustomerAddressController>(TOKENS.CustomerAddressController);
+
 
 const customerAddressRouter = Router();
 

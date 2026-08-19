@@ -1,6 +1,5 @@
 import { db } from "../../../lib/knex/knex";
 
-
 export const findCategoriesByRestaurant = async (
     restaurantId: number
 ) => {

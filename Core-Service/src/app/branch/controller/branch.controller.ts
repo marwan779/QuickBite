@@ -1,11 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import { SystemRole } from "../../user/enums";
 import { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";
-import { branchService, type BranchService } from "../service/branch.service";
+import { type BranchService } from "../service/branch.service";
 import { validateBody } from "../../../lib/validation/validate";
+import { TOKENS } from "../../../lib/di/tokens";
+import { injectable, inject } from "tsyringe";
 
+@injectable()
 export class BranchController {
-    constructor(private readonly branchService: BranchService) {
+    constructor(@inject(TOKENS.BranchService) private readonly branchService: BranchService) {
     }
 
     create = async (req: Request, res: Response, next: NextFunction) => {
@@ -57,4 +60,3 @@ export class BranchController {
     }
 }
 
-export const branchController = new BranchController(branchService);

@@ -1,7 +1,11 @@
 import {Router} from "express";
 import {requireRestaurantMember, rbac} from "../../lib/auth/rbac";
-import {memberController} from "./controller/member.controller";
+import {MemberController} from "./controller/member.controller";
 import { authenticate } from "../../lib/auth/gaurd";
+import { container } from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+
+const memberController = container.resolve<MemberController>(TOKENS.MemberController);
 
 export const rbacRouter = Router();
 

@@ -1,5 +1,9 @@
 import {Router} from "express";
-import { authController } from "./controller/auth.controller";
+import { container } from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+import type { AuthController } from "./controller/auth.controller";
+
+const authController = container.resolve<AuthController>(TOKENS.AuthController);
 
 export const authRouter = Router();
 

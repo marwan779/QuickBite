@@ -3,9 +3,10 @@ import { RegisterRestaurantDTO } from "../../auth/dto/auth.dto";
 import { RestaurantStatus } from "../enums";
 import { createRestaurant, findAllRestaurants, findRestaurantById, updateRestaurant, updateRestaurantStatus } from "../repository/restaurant.repo";
 import { RestaurantEntity } from "../entity/restaurant";
-import { AppError } from "../../../lib/error/AppError";
 import { NotFoundError } from "../../../lib/auth/error";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class RestaurantService {
 
     create = async (
@@ -62,4 +63,3 @@ export class RestaurantService {
     };
 }
 
-export const restaurantService = new RestaurantService();

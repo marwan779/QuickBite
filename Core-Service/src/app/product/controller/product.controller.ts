@@ -5,7 +5,6 @@ import type {
 } from "express";
 
 import {
-    productService,
     type ProductService,
 } from "../service/product.service";
 
@@ -16,13 +15,14 @@ import {
 
 import { validateBody } from "../../../lib/validation/validate";
 import { NotAuthenticated } from "../../../lib/auth/error";
+import { TOKENS } from "../../../lib/di/tokens";
+import { injectable, inject } from "tsyringe";
 
-
-
+@injectable()
 export class ProductController {
 
     constructor(
-        private readonly productService: ProductService
+        @inject(TOKENS.ProductService) private readonly productService: ProductService
     ) {}
 
 
@@ -217,6 +217,3 @@ export class ProductController {
     };
 }
 
-
-export const productController =
-    new ProductController(productService);

@@ -9,17 +9,20 @@ import {
     ProductNotFoundError,
 } from "../errors";
 
-import { restaurantService, type RestaurantService } from "../../restaurant/service/restaurant.service";
+import {type RestaurantService } from "../../restaurant/service/restaurant.service";
 import { SystemRole } from "../../user/enums";
 import { createCategory, findCategoriesByRestaurant, findCategoryByName } from "../repo/category.repository";
 import { createProduct, findProductById, findProductsByBranch, findProductsByRestaurant, updateProduct } from "../repo/product.repository";
 import { findBranchDetails, updateBranchDetails } from "../repo/product-branch-details.repository";
 import { NotAuthorizedErrorToManageRestaurant } from "../../role-based-access-control/errors";
+import { TOKENS } from "../../../lib/di/tokens";
+import { injectable, inject } from "tsyringe";
 
+@injectable()
 export class ProductService {
 
     constructor(
-        private readonly restaurantService: RestaurantService
+        @inject(TOKENS.RestaurantService) private readonly restaurantService: RestaurantService
     ) {}
 
 
@@ -219,6 +222,3 @@ export class ProductService {
 }
 
 
-export const productService = new ProductService(
-    restaurantService
-);

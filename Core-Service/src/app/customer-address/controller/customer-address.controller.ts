@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
 import {
-    customerAddressService,
     type CustomerAddressService,
 } from "../service/customer-address.service";
 import {
@@ -9,11 +8,13 @@ import {
 } from "../dto/address.dto";
 import { validateBody } from "../../../lib/validation/validate";
 import { NotAuthenticated } from "../../../lib/auth/error";
+import { TOKENS } from "../../../lib/di/tokens";
+import { injectable, inject } from "tsyringe";
 
-
+@injectable()
 export class CustomerAddressController {
     constructor(
-        private readonly customerAddressService: CustomerAddressService
+        @inject(TOKENS.CustomerAddressService) private readonly customerAddressService: CustomerAddressService
     ) {}
 
 
@@ -133,5 +134,3 @@ export class CustomerAddressController {
 }
 
 
-export const customerAddressController =
-    new CustomerAddressController(customerAddressService);

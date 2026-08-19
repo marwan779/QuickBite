@@ -1,7 +1,9 @@
 import type { CreateCustomerAddressDTO, UpdateCustomerAddressDTO } from "../dto/address.dto";
 import { AddressNotFoundError } from "../error";
 import { createAddress, deleteAddress, findAddressById, findAddressesByUserId, updateAddress } from "../repository/customer-address.repo";
+import { injectable} from "tsyringe";
 
+@injectable()
 export class CustomerAddressService {
 
     getAddresses = async (userId: number) => {
@@ -65,5 +67,3 @@ export class CustomerAddressService {
 }
 
 
-export const customerAddressService =
-    new CustomerAddressService();

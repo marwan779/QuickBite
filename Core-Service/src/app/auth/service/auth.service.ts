@@ -1,20 +1,24 @@
 import { db } from "../../../lib/knex/knex";
-import { restaurantService, type RestaurantService } from "../../restaurant/service/restaurant.service";
+import {type RestaurantService } from "../../restaurant/service/restaurant.service";
 import { findBranchIdsByMemberId } from "../../role-based-access-control/repository/member-branch.repo";
 import { activateMemberByUserId, findRestaurantMemberWithRole } from "../../role-based-access-control/repository/restaurant_member.repo";
-import { MemberService, memberService } from "../../role-based-access-control/service/member.service";
+import { MemberService} from "../../role-based-access-control/service/member.service";
 import { SystemRole } from "../../user/enums";
 import {  findUserByEmail,  updateUserPassword } from "../../user/repository/users.repo";
-import { UserService, userService } from "../../user/service/user.service";
+import { UserService} from "../../user/service/user.service";
 import type { ResetPasswordDTO, ForgetPasswordDTO, LoginDTO, RegisterDTO } from "../dto/auth.dto";
 import { CannotSignupAsSystemAdmin, InvalidRole, IncorrectCredentials, InvalidOTPError, InvalidRefreshTokenError, RestaurantDataRequiredError } from "../errors";
 import { createPasswordReset, findLatestPasswordResetByUserId, updatePasswordResetConsumedAt } from "../repository/password-reset.repo";
 import { comparePassword, createAccessToken, createRefreshToken, generateOTP, hashOTP, hashPassword, verifyRefreshToken } from "../utils";
+import { TOKENS } from "../../../lib/di/tokens";
+import { injectable, inject } from "tsyringe";
 
-
+@injectable()
 export class AuthService {
 
-    constructor(private readonly restaurantService: RestaurantService, private readonly userService: UserService, private readonly memberService: MemberService) {
+    constructor(@inject(TOKENS.RestaurantService) private readonly restaurantService: RestaurantService, 
+                @inject(TOKENS.UserService) private readonly userService: UserService, 
+                @inject(TOKENS.MemberService) private readonly memberService: MemberService) {
     }
 
   register = async (data: RegisterDTO) => {
@@ -222,4 +226,3 @@ export class AuthService {
 
 
 
-export const authService = new AuthService(restaurantService, userService, memberService);

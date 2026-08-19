@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { restaurantController } from "./controller/restaurant.controller";
+import { RestaurantController} from "./controller/restaurant.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { authorize } from "../../lib/auth/authorize";
 import { SystemRole } from "../user/enums";
+import { container } from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+
+const restaurantController = container.resolve<RestaurantController>(TOKENS.RestaurantController);
+
 
 export const restaurantRouter = Router();
 

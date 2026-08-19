@@ -1,11 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
-import { authService, type AuthService } from "../service/auth.service";
+import {type AuthService } from "../service/auth.service";
 import { ForgetPasswordDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from "../dto/auth.dto";
 import { validateBody } from "../../../lib/validation/validate";
 import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../../lib/cookies/cookies";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../../../lib/di/tokens";
 
+@injectable()
 export class AuthController {
-    constructor(private readonly authService: AuthService) {
+    constructor(@inject(TOKENS.AuthService)private readonly authService: AuthService) {
     }
 
     register = async (req: Request, res: Response, next: NextFunction) => {
@@ -126,4 +129,3 @@ export class AuthController {
 
 
 
-export const authController = new AuthController(authService);

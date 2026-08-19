@@ -3,7 +3,9 @@ import {findRestaurantById} from "../../restaurant/repository/restaurant.repo";
 import {SystemRole} from "../../user/enums";
 import type { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";
 import {findNearbyBranches, createBranch, findBranchesByRestaurant, findBranchById, updateBranch, updateBranchStatus} from "../repository/branch.repository";
+import { injectable} from "tsyringe";
 
+@injectable()
 export class BranchService {
 
     findNearby = async (lat:number, lng:number) => {
@@ -73,5 +75,3 @@ export class BranchService {
         return updateBranchStatus(branchId, data.isActive);
     }
 }
-
-export const branchService = new BranchService();

@@ -22,6 +22,7 @@ const schema = z.object({
     REFRESH_SECRET: z.string(),
     ACCESS_EXPIRES_IN: z.string(),
     REFRESH_EXPIRES_IN: z.string(),
+    CORS_ORIGINS: z.string().default('http://localhost:3000'),
 });
 
 const parsed = schema.parse(process.env);
@@ -47,6 +48,9 @@ export const env = {
         accessSecret: parsed.ACCESS_SECRET,
         accessExpiresIn: parsed.ACCESS_EXPIRES_IN,
         refreshExpiresIn: parsed.REFRESH_EXPIRES_IN,
-    }
+    },
+    cors: {
+        origins: parsed.CORS_ORIGINS.split(','),
+    },
 
 }

@@ -2,6 +2,7 @@ import type { Knex } from "knex";
 import {db} from "../../../lib/knex/knex";
 import { RestaurantEntity } from "../entity/restaurant";
 import { RestaurantStatus } from "../enums";
+import { applyCursorPagination, applyFilters, type FilterParams, type PaginationParams } from "../../../lib/http/pagination/cursor-pagination";
 
 const RESTAURANT_COLUMNS = ['id','owner_id','name', 'logo_url','status','primary_country'
     ,'created_at','updated_at','status_updated_at'];
@@ -21,8 +22,11 @@ function toEntity(row: any) {
     )
 }
 
-export async function findAllRestaurants(): Promise<RestaurantEntity[]> {
-    const rows = await db("restaurants").select(RESTAURANT_COLUMNS);
+export async function findAllRestaurants(params: PaginationParams, filters: FilterParams[]): Promise<RestaurantEntity[]> {
+    let query = db("restaurants").select(RESTAURANT_COLUMNS);
+    query = applyFilters(query, filters)
+    query = applyCursorPagination(query, params) // `SELECT * FROM ETC WHERE ETCC ORDEY BY LIMIT
+    const rows = await query
     return rows.map(toEntity);
 }
 

@@ -4,13 +4,14 @@ import { authenticate } from "../../lib/auth/gaurd";
 import { rbac, requireBranchAccess, requireRestaurantMember } from "../../lib/auth/rbac";
 import { container } from "../../lib/di/container";
 import { TOKENS } from "../../lib/di/tokens";
+import { withCache } from "../../lib/cache/withcache";
 
 const branchController = container.resolve<BranchController>(TOKENS.BranchController);
 
 
 export const branchRouter = Router();
 
-branchRouter.get('/branches/nearby', branchController.findNearby)
+branchRouter.get('/branches/nearby', withCache(), branchController.findNearby)
 branchRouter.post('/restaurants/:restaurantId/branches', authenticate, branchController.create)
 branchRouter.get('/restaurants/:restaurantId/branches', authenticate, branchController.findByRestaurant)
 branchRouter.patch('/branches/:branchId', authenticate, branchController.update)

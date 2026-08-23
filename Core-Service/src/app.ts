@@ -15,6 +15,7 @@ export function createApp() {
         origin: env.cors.origins,
         credentials: true,
     }));
+    app.set('query parser', 'extended');
     app.use(express.json());
     app.use(cookieParser())
     app.use(correlationId);

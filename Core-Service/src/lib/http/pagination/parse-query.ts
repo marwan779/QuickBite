@@ -1,4 +1,4 @@
-import {PaginationParams, FilterParams} from "./cursor-pagination";
+import type {PaginationParams, FilterParams} from "./cursor-pagination";
 
 export function parsePaginationQuery(query : Record<string, any>): PaginationParams {
         return {

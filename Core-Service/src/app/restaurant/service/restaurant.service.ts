@@ -5,6 +5,7 @@ import { createRestaurant, findAllRestaurants, findRestaurantById, updateRestaur
 import { RestaurantEntity } from "../entity/restaurant";
 import { NotFoundError } from "../../../lib/auth/error";
 import { injectable } from "tsyringe";
+import { buildPaginationResult, type FilterParams, type PaginationParams } from "../../../lib/http/pagination/cursor-pagination";
 
 @injectable()
 export class RestaurantService {
@@ -31,10 +32,11 @@ export class RestaurantService {
         return result;
     };
 
-    findAll = async () => {
-        const result = await findAllRestaurants();
-        return result;
-    };
+    findAll = async(params: PaginationParams, filters: FilterParams[]) => {
+        const result = await findAllRestaurants(params, filters);
+        return buildPaginationResult(result, params.limit, params.sortBy);
+    }
+
 
     findById = async (id: number) => {
         const restaurant = await findRestaurantById(id);

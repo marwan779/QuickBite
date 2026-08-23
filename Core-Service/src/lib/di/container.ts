@@ -24,6 +24,9 @@ import { MemberService } from "../../app/role-based-access-control/service/membe
 import { MemberController } from "../../app/role-based-access-control/controller/member.controller";
 import { PermissionCacheService } from "../../app/role-based-access-control/service/permission-cache.service";
 import { Logger } from "../logger/logger";
+import { cacheProvider } from "../cache/init";
+
+
 container.registerSingleton<UserService>(TOKENS.UserService, UserService);
 container.registerSingleton<RestaurantService>(TOKENS.RestaurantService, RestaurantService);
 container.registerSingleton<BranchService>(TOKENS.BranchService, BranchService);
@@ -41,5 +44,6 @@ container.registerSingleton<ProductController>(TOKENS.ProductController, Product
 container.registerSingleton<MemberController>(TOKENS.MemberController, MemberController);
 container.registerSingleton<CustomerAddressController>(TOKENS.CustomerAddressController, CustomerAddressController);
 
+container.registerInstance(TOKENS.CacheProvider, cacheProvider);
 
 export {container};

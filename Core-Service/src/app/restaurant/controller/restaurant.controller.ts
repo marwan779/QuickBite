@@ -4,19 +4,24 @@ import { validateBody } from "../../../lib/validation/validate";
 import { CreateRestaurantDTO, UpdateRestaurantDTO, UpdateRestaurantStatusDTO } from "../dto/restaurant.dto";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
+import { sendPaginated } from "../../../lib/http/response";
+import { parseFilters, parsePaginationQuery } from "../../../lib/http/pagination/parse-query";
 
 @injectable()
 export class RestaurantController {
     constructor(@inject(TOKENS.RestaurantService) private readonly restaurantService: RestaurantService) {}
 
-    getAll = async (req: Request, res: Response, next: NextFunction) => {
+     getAll = async(req: Request, res: Response, next: NextFunction) => {
         try {
-            const result = await this.restaurantService.findAll();
-            res.status(200).json({ data: result });
+            const params = parsePaginationQuery(req.query);
+            const filters = parseFilters(req.query,['id','status','name']);
+            const result = await this.restaurantService.findAll(params, filters);
+            sendPaginated(res, result.data, result.meta);
         } catch (err) {
             next(err);
         }
     }
+
 
     getById = async (req: Request, res: Response, next: NextFunction) => {
         try {

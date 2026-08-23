@@ -32,12 +32,15 @@ import { getPermissionsDetailsByRoleName } from "../repository/permission.repo";
 import { BranchesNotBelongToRestaurantError } from "../../branch/error";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
+import type { MailjetEmailProvider } from "../../../pkg/email/mailjet";
+import { memberInvitationEmail } from "../templates/member-invitation";
 
 
 @injectable()
 export class MemberService {
     // 1. Inject the userService into the constructor for proper layering
-    constructor(@inject(TOKENS.UserService) private readonly userServiceImpl = userService) { }
+    constructor(@inject(TOKENS.UserService) private readonly userServiceImpl = userService,
+                @inject(TOKENS.EmailProvider) private readonly emailProvider: MailjetEmailProvider) { }
 
     // =========================================================
     // CREATION METHODS
@@ -121,8 +124,9 @@ export class MemberService {
                 createdAt: new Date(),
             }, trx);
 
-            // TODO: integrate email provider
-            console.log(`mocked email sent ${otp}`);
+            // integrate email provider
+            const email = memberInvitationEmail(otp, data.role);
+            await this.emailProvider.send(data.email, email.subject, email.html);
 
             await trx.commit();
             return { message: "Member created successfully", member };

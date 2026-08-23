@@ -25,6 +25,8 @@ import { MemberController } from "../../app/role-based-access-control/controller
 import { PermissionCacheService } from "../../app/role-based-access-control/service/permission-cache.service";
 import { Logger } from "../logger/logger";
 import { cacheProvider } from "../cache/init";
+import { MailjetEmailProvider } from "../../pkg/email/mailjet";
+import { emailProvider } from "../email/init";
 
 
 container.registerSingleton<UserService>(TOKENS.UserService, UserService);
@@ -45,5 +47,6 @@ container.registerSingleton<MemberController>(TOKENS.MemberController, MemberCon
 container.registerSingleton<CustomerAddressController>(TOKENS.CustomerAddressController, CustomerAddressController);
 
 container.registerInstance(TOKENS.CacheProvider, cacheProvider);
+container.registerInstance<MailjetEmailProvider>(TOKENS.EmailProvider, emailProvider);
 
 export {container};

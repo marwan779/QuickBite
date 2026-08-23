@@ -1,10 +1,40 @@
 import type { Knex } from "knex";
 import {db} from "../../../lib/knex/knex";
 import { Branch } from "../entity/branch.entity";
+import { applyCursorPagination, type PaginationParams } from "../../../lib/http/pagination/cursor-pagination";
 
 const BRANCH_COLUMNS = ['id','restaurant_id','country_code','address_text','label','lat','lng',
     'is_active','opens_at','closes_at','accept_orders','created_at','updated_at',
     'delivery_radius','currency','commission','location'];
+
+interface NearbyBranchRow {
+    id: number;
+    restaurant_id: number;
+    address_text: string;
+    label: string;
+    lat: number;
+    lng: number;
+    is_active: boolean;
+    accept_orders: boolean;
+    currency: string;
+    name: string;
+    logo_url: string | null;
+}
+
+export interface NearbyBranch {
+    id: number;
+    restaurantId: number;
+    addressText: string;
+    label: string;
+    lat: number;
+    lng: number;
+    isActive: boolean;
+    acceptOrders: boolean;
+    currency: string;
+    name: string;
+    logoUrl: string | null;
+}
+
 
 function toEntity(row: any) {
     return new Branch({
@@ -50,10 +80,18 @@ export async function createBranch (data: Partial <Branch>, conn: Knex = db): Pr
     return toEntity(row);
 }
 
-export async function findBranchesByRestaurant(restaurantId: number): Promise<Branch[]> {
-    const rows = await db("restaurant_branches")
+export async function findBranchesByRestaurant(
+    restaurantId: number,
+    pagination: PaginationParams
+): Promise<Branch[]> {
+    let query = db("restaurant_branches")
         .where({ restaurant_id: restaurantId })
         .select(BRANCH_COLUMNS);
+
+    query = applyCursorPagination(query, pagination);
+
+    const rows = await query;
+
     return rows.map(toEntity);
 }
 
@@ -98,24 +136,47 @@ export async function updateBranchStatus(id: number, isActive: boolean, conn: Kn
     return toEntity(row);
 }
 
-export async function findNearbyBranches(lat: number, lng: number): Promise<Branch[]> {
+export async function findNearbyBranches(
+    lat: number,
+    lng: number
+): Promise<NearbyBranch[]> {
     const result = await db.raw(`
-       SELECT 
-       b.id,
-       b.restaurant_id,
-       b.address_text,
-       b.label,
-       b.lat,
-       b.lng,
-       b.is_active,
-       b.accept_orders,
-       b.currency,
-       r.name,
-       r.logo_url
-       FROM restaurant_branches b JOIN restaurants r ON  b.restaurant_id = r.id
-       WHERE b.is_active = true AND r.status ='active'
-       AND ST_DWithin(b.location, ST_MakePoint(?, ?)::geography, b.delivery_radius*1000)
-   `,[lng, lat]);
+        SELECT
+            b.id,
+            b.restaurant_id,
+            b.address_text,
+            b.label,
+            b.lat,
+            b.lng,
+            b.is_active,
+            b.accept_orders,
+            b.currency,
+            r.name,
+            r.logo_url
+        FROM restaurant_branches b
+        JOIN restaurants r ON b.restaurant_id = r.id
+        WHERE b.is_active = true
+          AND r.status = 'active'
+          AND ST_DWithin(
+              b.location,
+              ST_MakePoint(?, ?)::geography,
+              b.delivery_radius * 1000
+          )
+    `, [lng, lat]);
 
-    return result.rows;
+    const rows = result.rows as NearbyBranchRow[];
+
+    return rows.map((row) => ({
+        id: row.id,
+        restaurantId: row.restaurant_id,
+        addressText: row.address_text,
+        label: row.label,
+        lat: row.lat,
+        lng: row.lng,
+        isActive: row.is_active,
+        acceptOrders: row.accept_orders,
+        currency: row.currency,
+        name: row.name,
+        logoUrl: row.logo_url,
+    }));
 }

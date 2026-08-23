@@ -1,4 +1,5 @@
 import type {Knex} from "knex";
+import { camelToSnakeCase } from "../../../pkg/utils/camelToSnakeCase";
 
 export interface PaginationParams {
     cursor?: string;
@@ -22,17 +23,29 @@ export interface PaginationMeta {
 // createdAt: 2025-10-10 desc 10
 // select * from xxxx where xxx = yyy
 // createdAt  < 2025-10-10 order by created_at desc limit 10
-
-export function applyCursorPagination<T>( query: Knex.QueryBuilder, params: PaginationParams ): Knex.QueryBuilder {
-    if(!params.sortBy) {
+export function applyCursorPagination<T>(
+    query: Knex.QueryBuilder,
+    params: PaginationParams
+): Knex.QueryBuilder {
+    if (!params.sortBy) {
         return query;
     }
-    if(params.cursor) {
-        const op = params.sortOrder === 'asc' ? '>' : '<'
-        query = query.where(params.sortBy, op,params.cursor)
+
+    const sortColumn = camelToSnakeCase(params.sortBy);
+
+    if (params.cursor) {
+        const op = params.sortOrder === 'asc' ? '>' : '<';
+
+        query = query.where(
+            sortColumn,
+            op,
+            params.cursor
+        );
     }
-    console.log(params)
-    return query.orderBy(params.sortBy, params.sortOrder).limit(params.limit + 1);
+
+    return query
+        .orderBy(sortColumn, params.sortOrder)
+        .limit(params.limit + 1);
 }
 
 export function applyFilters<T>( query: Knex.QueryBuilder, filters: FilterParams[] ): Knex.QueryBuilder {

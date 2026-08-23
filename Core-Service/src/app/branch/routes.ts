@@ -5,6 +5,7 @@ import { rbac, requireBranchAccess, requireRestaurantMember } from "../../lib/au
 import { container } from "../../lib/di/container";
 import { TOKENS } from "../../lib/di/tokens";
 import { withCache } from "../../lib/cache/withcache";
+import { idempotency } from "../../lib/idempotency/idempotency";
 
 const branchController = container.resolve<BranchController>(TOKENS.BranchController);
 
@@ -12,10 +13,10 @@ const branchController = container.resolve<BranchController>(TOKENS.BranchContro
 export const branchRouter = Router();
 
 branchRouter.get('/branches/nearby', withCache(), branchController.findNearby)
-branchRouter.post('/restaurants/:restaurantId/branches', authenticate, branchController.create)
+branchRouter.post('/restaurants/:restaurantId/branches', authenticate, idempotency({strict: true}), branchController.create)
 branchRouter.get('/restaurants/:restaurantId/branches', authenticate, branchController.findByRestaurant)
-branchRouter.patch('/branches/:branchId', authenticate, branchController.update)
-branchRouter.patch('/branches/:branchId/status', authenticate, branchController.updateStatus)
+branchRouter.patch('/branches/:branchId', authenticate, idempotency({strict: true}), branchController.update)
+branchRouter.patch('/branches/:branchId/status', authenticate, idempotency({strict: true}), branchController.updateStatus)
 
 branchRouter.post('/restaurants/:restaurantId/branches', 
     authenticate, 

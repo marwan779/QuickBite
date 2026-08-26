@@ -1,0 +1,1 @@
+{"version":3,"file":"permission.repo.d.ts","sourceRoot":"","sources":["../../../../src/app/role-based-access-control/repository/permission.repo.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,MAAM,CAAC;AAajC,wBAAsB,wBAAwB,CAC1C,QAAQ,EAAE,MAAM,EAChB,GAAG,CAAC,EAAE,IAAI,CAAC,WAAW,GACvB,OAAO,CAAC,MAAM,EAAE,CAAC,CAYnB;AAED,wBAAsB,+BAA+B,CAAC,QAAQ,EAAE,MAAM,kBAMrE"}

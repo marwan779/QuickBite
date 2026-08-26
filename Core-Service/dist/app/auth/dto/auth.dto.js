@@ -7,14 +7,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { IsEmail, MinLength, IsString, IsStrongPassword, MaxLength, IsEnum } from "class-validator";
-import { SystemRole } from "../../user/enums.js";
+import { IsEmail, MinLength, IsString, IsStrongPassword, MaxLength, IsEnum, IsNotEmpty, Length, IsOptional, ValidateNested } from "class-validator";
+import { SystemRole } from "../../user/enums";
+import { Type } from "class-transformer";
 export class RegisterDTO {
     email;
     phone;
     name;
     password;
     role;
+    restaurant;
 }
 __decorate([
     IsEmail(),
@@ -46,4 +48,76 @@ __decorate([
     IsEnum(SystemRole),
     __metadata("design:type", String)
 ], RegisterDTO.prototype, "role", void 0);
+__decorate([
+    IsOptional(),
+    ValidateNested(),
+    Type(() => RegisterRestaurantDTO),
+    __metadata("design:type", RegisterRestaurantDTO)
+], RegisterDTO.prototype, "restaurant", void 0);
+export class LoginDTO {
+    email;
+    password;
+}
+__decorate([
+    IsEmail(),
+    __metadata("design:type", String)
+], LoginDTO.prototype, "email", void 0);
+__decorate([
+    IsString(),
+    IsNotEmpty(),
+    __metadata("design:type", String)
+], LoginDTO.prototype, "password", void 0);
+export class ForgetPasswordDTO {
+    email;
+}
+__decorate([
+    IsEmail(),
+    __metadata("design:type", String)
+], ForgetPasswordDTO.prototype, "email", void 0);
+export class ResetPasswordDTO {
+    email;
+    otp;
+    newPassword;
+}
+__decorate([
+    IsEmail(),
+    __metadata("design:type", String)
+], ResetPasswordDTO.prototype, "email", void 0);
+__decorate([
+    IsString(),
+    Length(6),
+    __metadata("design:type", String)
+], ResetPasswordDTO.prototype, "otp", void 0);
+__decorate([
+    IsStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+    }, {
+        message: 'Password is not strong enough. It must contain at least 8 characters, one uppercase letter, one lowercase letter, one number.',
+    }),
+    __metadata("design:type", String)
+], ResetPasswordDTO.prototype, "newPassword", void 0);
+export class RegisterRestaurantDTO {
+    name;
+    logoURL;
+    primaryCountry;
+}
+__decorate([
+    IsString(),
+    MinLength(1),
+    __metadata("design:type", String)
+], RegisterRestaurantDTO.prototype, "name", void 0);
+__decorate([
+    IsOptional(),
+    IsString(),
+    __metadata("design:type", String)
+], RegisterRestaurantDTO.prototype, "logoURL", void 0);
+__decorate([
+    IsString(),
+    MinLength(1),
+    __metadata("design:type", String)
+], RegisterRestaurantDTO.prototype, "primaryCountry", void 0);
 //# sourceMappingURL=auth.dto.js.map

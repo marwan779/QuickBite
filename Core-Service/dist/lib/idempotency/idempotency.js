@@ -1,0 +1,65 @@
+import { container } from "tsyringe";
+import { TOKENS } from "../di/tokens";
+import { toMs } from "../../pkg/utils/time";
+export const idempotency = (options = {}) => {
+    const { strict = false } = options;
+    return async (req, res, next) => {
+        // Idempotency is only needed for operations that can modify data
+        if (!["POST", "PUT", "PATCH"].includes(req.method)) {
+            return next();
+        }
+        const idempotencyKey = req.get("Idempotency-Key");
+        // No idempotency key
+        if (!idempotencyKey) {
+            if (strict) {
+                return res.status(400).json({
+                    message: "Idempotency-Key header is required",
+                });
+            }
+            return next();
+        }
+        let cacheProvider;
+        try {
+            cacheProvider = container.resolve(TOKENS.CacheProvider);
+        }
+        catch {
+            if (strict) {
+                return res.status(503).json({
+                    message: "Idempotency service is unavailable",
+                });
+            }
+            return next();
+        }
+        const key = `idempotency:${req.method}:${req.originalUrl}:${idempotencyKey}`;
+        try {
+            // Check if this request was already processed
+            const cachedResponse = await cacheProvider.get(key);
+            if (cachedResponse) {
+                return res.status(200).json(JSON.parse(cachedResponse));
+            }
+            // Keep the original res.json()
+            const originalJson = res.json.bind(res);
+            // Replace res.json() temporarily
+            res.json = ((body) => {
+                // Save the response asynchronously
+                cacheProvider
+                    .set(key, JSON.stringify(body), toMs(1, 'd'))
+                    .catch((error) => {
+                    console.error("Failed to store idempotency response:", error);
+                });
+                // Send the response normally
+                return originalJson(body);
+            });
+            return next();
+        }
+        catch (error) {
+            if (strict) {
+                return res.status(503).json({
+                    message: "Idempotency service is unavailable",
+                });
+            }
+            return next();
+        }
+    };
+};
+//# sourceMappingURL=idempotency.js.map

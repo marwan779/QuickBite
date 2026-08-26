@@ -16,7 +16,8 @@ export function withCache(ttl = 3600, userScoped = false) {
 
             if (cached) {
                 res.setHeader("X-Cache", "HIT");
-                return res.status(200).json(JSON.parse(cached));
+                res.status(200).json(JSON.parse(cached));
+                return;
             } 
             
             const originalJson = res.json.bind(res);

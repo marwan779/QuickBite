@@ -23,7 +23,7 @@ export interface PaginationMeta {
 // createdAt: 2025-10-10 desc 10
 // select * from xxxx where xxx = yyy
 // createdAt  < 2025-10-10 order by created_at desc limit 10
-export function applyCursorPagination<T>(
+export function applyCursorPagination(
     query: Knex.QueryBuilder,
     params: PaginationParams
 ): Knex.QueryBuilder {
@@ -48,7 +48,7 @@ export function applyCursorPagination<T>(
         .limit(params.limit + 1);
 }
 
-export function applyFilters<T>( query: Knex.QueryBuilder, filters: FilterParams[] ): Knex.QueryBuilder {
+export function applyFilters( query: Knex.QueryBuilder, filters: FilterParams[] ): Knex.QueryBuilder {
     for (const filter of filters) {
        switch (filter.operator) {
            case 'eq': query.where(filter.field, filter.value); break;

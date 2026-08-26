@@ -5,6 +5,7 @@ import type { SystemRole } from "../enums";
 import { UserNotFoundError } from "../errors";
 import {createUser, findUserById, findUserExistsByEmailOrPhone, updateUser} from "../repository/users.repo";
 import type { Knex } from "knex";
+import { injectable } from "tsyringe";
 
 export interface CreateUserData {
     email: string;
@@ -14,6 +15,7 @@ export interface CreateUserData {
     systemRole: SystemRole;
 }
 
+@injectable()
 export class UserService {
 create = async (data: CreateUserData, trx?: Knex.Transaction) => {
         const exists = await findUserExistsByEmailOrPhone(data.email, data.phone);

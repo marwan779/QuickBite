@@ -1,0 +1,1 @@
+{"version":3,"file":"permission.entity.d.ts","sourceRoot":"","sources":["../../../../src/app/role-based-access-control/entity/permission.entity.ts"],"names":[],"mappings":"AAAA,qBAAa,UAAU;IACnB,EAAE,EAAE,MAAM,CAAC;IACX,QAAQ,EAAE,MAAM,CAAC;IACjB,MAAM,EAAE,MAAM,CAAC;IACf,SAAS,EAAE,IAAI,CAAC;IAEhB,YAAY,IAAI,EAAE,OAAO,CAAC,UAAU,CAAC,EAKpC;CACJ"}

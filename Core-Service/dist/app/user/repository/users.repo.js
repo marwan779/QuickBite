@@ -1,4 +1,4 @@
-import { db } from "../../../common/knex/knex";
+import { db } from "../../../lib/knex/knex";
 import { User } from "../entity/user";
 const USER_COLUMNS = [
     "id", "email", "phone", "name", "password_hash", "system_role", "created_at", "updated_at", "deleted_at"
@@ -27,8 +27,8 @@ export async function findUserExistsByEmailOrPhone(email, phone) {
     `, [email, phone]);
     return result.rows[0].exists;
 }
-export async function createUser(user) {
-    const [row] = await db("users").insert({
+export async function createUser(user, conn) {
+    const [row] = await conn("users").insert({
         email: user.email,
         phone: user.phone,
         name: user.name,
@@ -36,6 +36,21 @@ export async function createUser(user) {
         system_role: user.systemRole,
         created_at: user.createdAt,
         updated_at: user.updatedAt,
+    }).returning(USER_COLUMNS);
+    return toEntity(row);
+}
+export async function updateUserPassword(id, password) {
+    await db("users").where("id", id).
+        update({ password_hash: password });
+}
+export async function findUserById(id) {
+    const row = await db("users").select(USER_COLUMNS).where("id", id).whereNull("deleted_at").first();
+    return row ? toEntity(row) : undefined;
+}
+export async function updateUser(id, data) {
+    const [row] = await db("users").where("id", id).update({
+        ...data,
+        updated_at: new Date(),
     }).returning(USER_COLUMNS);
     return toEntity(row);
 }

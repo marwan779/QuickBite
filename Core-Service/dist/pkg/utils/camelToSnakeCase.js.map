@@ -1,0 +1,1 @@
+{"version":3,"file":"camelToSnakeCase.js","sourceRoot":"","sources":["../../../src/pkg/utils/camelToSnakeCase.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,gBAAgB,CAAC,KAAa;IAC1C,OAAO,KAAK,CAAC,OAAO,CAChB,QAAQ,EACR,MAAM,CAAC,EAAE,CAAC,IAAI,MAAM,CAAC,WAAW,EAAE,EAAE,CACvC,CAAC;AACN,CAAC"}

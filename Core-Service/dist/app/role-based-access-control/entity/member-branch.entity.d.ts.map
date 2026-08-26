@@ -1,0 +1,1 @@
+{"version":3,"file":"member-branch.entity.d.ts","sourceRoot":"","sources":["../../../../src/app/role-based-access-control/entity/member-branch.entity.ts"],"names":[],"mappings":"AAAA,qBAAa,YAAY;IACrB,QAAQ,EAAE,MAAM,CAAC;IACjB,QAAQ,EAAE,MAAM,CAAC;IACjB,SAAS,EAAE,IAAI,CAAC;IAEhB,YAAY,IAAI,EAAE,OAAO,CAAC,YAAY,CAAC,EAItC;CACJ"}

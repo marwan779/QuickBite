@@ -14,7 +14,6 @@ import {
 } from "../dto/product.dto";
 
 import { validateBody } from "../../../lib/validation/validate";
-import { NotAuthenticated } from "../../../lib/auth/error";
 import { TOKENS } from "../../../lib/di/tokens";
 import { injectable, inject } from "tsyringe";
 
@@ -82,19 +81,12 @@ export class ProductController {
         next: NextFunction
     ) => {
         try {
-
-            if (!req.user) {
-                throw NotAuthenticated;
-            }
-
             const restaurantId =
                 Number(req.params.restaurantId);
 
             const products =
                 await this.productService.findByRestaurant(
-                    restaurantId,
-                    req.user.userId,
-                    req.user.role
+                    restaurantId
                 );
 
             res.status(200).json({
@@ -136,11 +128,6 @@ export class ProductController {
         next: NextFunction
     ) => {
         try {
-
-            if (!req.user) {
-                throw NotAuthenticated;
-            }
-
             const data =
                 await validateBody(
                     CreateProductDTO,
@@ -153,8 +140,6 @@ export class ProductController {
             const product =
                 await this.productService.create(
                     restaurantId,
-                    req.user.userId,
-                    req.user.role,
                     data
                 );
 
@@ -175,11 +160,6 @@ export class ProductController {
         next: NextFunction
     ) => {
         try {
-
-            if (!req.user) {
-                throw NotAuthenticated;
-            }
-
             const data =
                 await validateBody(
                     UpdateProductDTO,
@@ -197,8 +177,6 @@ export class ProductController {
             const result =
                 await this.productService.update(
                     productId,
-                    req.user.userId,
-                    req.user.role,
                     branchId,
                     data
                 );

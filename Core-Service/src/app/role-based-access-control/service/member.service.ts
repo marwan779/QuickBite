@@ -4,7 +4,7 @@ import { toMs } from "../../../pkg/utils/time";
 import { createPasswordReset } from "../../auth/repository/password-reset.repo";
 import { generateOTP, hashOTP } from "../../auth/utils";
 import { SystemRole } from "../../user/enums";
-import { userService } from "../../user/service/user.service";
+import type { UserService } from "../../user/service/user.service";
 import { CreateMemberDTO } from "../dto/member.dto";
 import type { UpdateMemberBranchesDTO, UpdateMemberDTO } from "../dto/member.dto";
 import { MemberBranch } from "../entity/member-branch.entity";
@@ -39,7 +39,7 @@ import { memberInvitationEmail } from "../templates/member-invitation";
 @injectable()
 export class MemberService {
     // 1. Inject the userService into the constructor for proper layering
-    constructor(@inject(TOKENS.UserService) private readonly userServiceImpl = userService,
+    constructor(@inject(TOKENS.UserService) private readonly userServiceImpl: UserService,
                 @inject(TOKENS.EmailProvider) private readonly emailProvider: MailjetEmailProvider) { }
 
     // =========================================================

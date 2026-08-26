@@ -10,7 +10,7 @@ export interface RedisConfig {
 export class RedisCacheProvider implements ICacheProvider {
     private readonly client: Redis;
 
-    constructor(private readonly config: RedisConfig) {
+    constructor(config: RedisConfig) {
         this.client = new Redis({
             host: config.host,
             port: config.port,

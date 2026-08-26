@@ -12,22 +12,38 @@ const branchController = container.resolve<BranchController>(TOKENS.BranchContro
 
 export const branchRouter = Router();
 
-branchRouter.get('/branches/nearby', withCache(), branchController.findNearby)
-branchRouter.post('/restaurants/:restaurantId/branches', authenticate, idempotency({strict: true}), branchController.create)
-branchRouter.get('/restaurants/:restaurantId/branches', authenticate, branchController.findByRestaurant)
-branchRouter.patch('/branches/:branchId', authenticate, idempotency({strict: true}), branchController.update)
-branchRouter.patch('/branches/:branchId/status', authenticate, idempotency({strict: true}), branchController.updateStatus)
+branchRouter.get('/branches/nearby', withCache(), branchController.findNearby);
 
-branchRouter.post('/restaurants/:restaurantId/branches', 
-    authenticate, 
+branchRouter.post(
+    '/restaurants/:restaurantId/branches',
+    authenticate,
     requireRestaurantMember('restaurantId'),
-    rbac({resource:"core:branch", action:"create"}),
+    rbac({ resource: "core:branch", action: "create" }),
+    idempotency({ strict: true }),
     branchController.create
 );
 
-branchRouter.patch('/branches/:branchId', 
-    authenticate, 
+branchRouter.get(
+    '/restaurants/:restaurantId/branches',
+    authenticate,
+    requireRestaurantMember('restaurantId'),
+    branchController.findByRestaurant
+);
+
+branchRouter.patch(
+    '/branches/:branchId',
+    authenticate,
     requireBranchAccess('branchId'),
-    rbac({resource:"core:branch", action:"update"}),
+    rbac({ resource: "core:branch", action: "update" }),
+    idempotency({ strict: true }),
     branchController.update
+);
+
+branchRouter.patch(
+    '/branches/:branchId/status',
+    authenticate,
+    requireBranchAccess('branchId'),
+    rbac({ resource: "core:branch", action: "update" }),
+    idempotency({ strict: true }),
+    branchController.updateStatus
 );

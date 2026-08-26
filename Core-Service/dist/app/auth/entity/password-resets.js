@@ -1,3 +1,4 @@
+// password-resets.ts
 export class PasswordReset {
     id;
     userId;
@@ -5,13 +6,13 @@ export class PasswordReset {
     expiresAt;
     consumedAt;
     createdAt;
-    constructor(id, userId, otpHash, expiresAt, consumedAt, createdAt) {
-        this.id = id;
-        this.userId = userId;
-        this.otpHash = otpHash;
-        this.expiresAt = expiresAt;
-        this.createdAt = createdAt;
-        this.consumedAt = consumedAt;
+    constructor(props) {
+        this.id = props.id;
+        this.userId = props.userId;
+        this.otpHash = props.otpHash;
+        this.expiresAt = props.expiresAt;
+        this.consumedAt = props.consumedAt;
+        this.createdAt = props.createdAt;
     }
     isExpired() {
         return this.expiresAt < new Date();

@@ -2,17 +2,22 @@ import type {PaginationParams, FilterParams} from "./cursor-pagination";
 
 export function parsePaginationQuery(
     query: Record<string, any>,
-    allowedSortBy: string[]
+    allowedSortBy: string[] = ['createdAt']
 ): PaginationParams {
     const requestedSortBy = query.sortBy as string;
 
-    const sortBy = allowedSortBy.includes(requestedSortBy)
+    const sortBy = (allowedSortBy && allowedSortBy.includes(requestedSortBy))
         ? requestedSortBy
-        : 'createdAt';
+        : (allowedSortBy?.[0] || 'createdAt');
+
+    const limitParsed = Number(query.limit);
+    const limit = !isNaN(limitParsed) && limitParsed > 0
+        ? Math.min(1000, limitParsed)
+        : 20;
 
     return {
         cursor: query.cursor as string,
-        limit: Math.min(1000, Number(query.limit)),
+        limit,
         sortBy,
         sortOrder: query.sortOrder === 'desc' ? 'desc' : 'asc'
     };

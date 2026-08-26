@@ -1,0 +1,1 @@
+{"version":3,"file":"role.repo.d.ts","sourceRoot":"","sources":["../../../../src/app/role-based-access-control/repository/role.repo.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,MAAM,CAAC;AAIjC,wBAAsB,cAAc,CAChC,IAAI,EAAE,MAAM,EACZ,GAAG,CAAC,EAAE,IAAI,CAAC,WAAW,GACvB,OAAO,CAAC,MAAM,GAAG,IAAI,CAAC,CAUxB"}

@@ -10,11 +10,9 @@ import {
 } from "../errors";
 
 import {type RestaurantService } from "../../restaurant/service/restaurant.service";
-import { SystemRole } from "../../user/enums";
 import { createCategory, findCategoriesByRestaurant, findCategoryByName } from "../repo/category.repository";
 import { createProduct, findProductById, findProductsByBranch, findProductsByRestaurant, updateProduct } from "../repo/product.repository";
 import { findBranchDetails, updateBranchDetails } from "../repo/product-branch-details.repository";
-import { NotAuthorizedErrorToManageRestaurant } from "../../role-based-access-control/errors";
 import { TOKENS } from "../../../lib/di/tokens";
 import { injectable, inject } from "tsyringe";
 
@@ -41,17 +39,9 @@ export class ProductService {
 
 
     findByRestaurant = async (
-        restaurantId: number,
-        userId: number,
-        role: string
+        restaurantId: number
     ) => {
-
-        await this.checkRestaurantAccess(
-            restaurantId,
-            userId,
-            role
-        );
-
+        await this.checkRestaurantAccess(restaurantId);
         return findProductsByRestaurant(restaurantId);
     };
 
@@ -72,16 +62,10 @@ export class ProductService {
 
     create = async (
         restaurantId: number,
-        userId: number,
-        role: string,
         data: CreateProductDTO
     ) => {
 
-        await this.checkRestaurantAccess(
-            restaurantId,
-            userId,
-            role
-        );
+        await this.checkRestaurantAccess(restaurantId);
 
         let categoryId: number | null = null;
 
@@ -117,8 +101,6 @@ export class ProductService {
 
     update = async (
         productId: number,
-        userId: number,
-        role: string,
         branchId: number | undefined,
         data: UpdateProductDTO
     ) => {
@@ -130,11 +112,7 @@ export class ProductService {
             throw ProductNotFoundError;
         }
 
-        await this.checkRestaurantAccess(
-            existingProduct.restaurantId,
-            userId,
-            role
-        );
+        await this.checkRestaurantAccess(existingProduct.restaurantId);
 
         let categoryId: number | null | undefined;
 
@@ -197,27 +175,16 @@ export class ProductService {
 
 
     private checkRestaurantAccess = async (
-        restaurantId: number,
-        userId: number,
-        role: string
+        restaurantId: number
     ) => {
-
-        if (role === SystemRole.SYSTEM_ADMIN) {
-            return;
-        }
-
         /*
          * Do not access RestaurantRepository directly here.
          *
          * ProductService talks to RestaurantService,
          * keeping the module boundary clean.
+         * Throws NotFoundError if restaurant does not exist.
          */
-        const restaurant =
-            await this.restaurantService.findById(restaurantId);
-
-        if (!restaurant || restaurant.ownerId !== userId) {
-            throw NotAuthorizedErrorToManageRestaurant;
-        }
+        await this.restaurantService.findById(restaurantId);
     };
 }
 

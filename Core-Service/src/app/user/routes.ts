@@ -1,6 +1,10 @@
 import { Router } from "express";
-import { userController } from "./controller/user.controller";
+import { UserController } from "./controller/user.controller";
 import { authenticate } from "../../lib/auth/gaurd";
+import { container } from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+
+const userController = container.resolve<UserController>(TOKENS.UserController);
 
 export const userRouter = Router();
 

@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { UserAlreadyExistsError } from "../../auth/errors";
 import { hashPassword } from "../../auth/utils";
+import { SystemRole } from "../enums";
 import { UserNotFoundError } from "../errors";
 import { createUser, findUserById, findUserExistsByEmailOrPhone, updateUser } from "../repository/users.repo";
 import { injectable } from "tsyringe";
@@ -25,7 +26,7 @@ let UserService = class UserService {
             systemRole: data.systemRole,
             createdAt: now,
             updatedAt: now,
-        }, trx); // Notice trx injection
+        }, trx);
     };
     getByUserId = async (userId) => {
         const user = await findUserById(userId);
@@ -53,6 +54,16 @@ let UserService = class UserService {
             phone: updated.phone,
             systemRole: updated.systemRole,
         };
+    };
+    getAgentById = async (id) => {
+        const user = await findUserById(id);
+        if (!user)
+            throw UserNotFoundError;
+        if (user.systemRole !== SystemRole.DELIVERY_AGENT) {
+            // Use UserNotFoundError to avoid enumeration of other user types.
+            throw UserNotFoundError;
+        }
+        return { id: user.id, name: user.name, phone: user.phone };
     };
 };
 UserService = __decorate([

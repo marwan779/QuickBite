@@ -2,6 +2,7 @@ import { Router } from "express";
 import { ProductController } from "./controller/product.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { rbac, requireRestaurantMember } from "../../lib/auth/rbac";
+import { requireInternalApiKey } from "../../lib/auth/api-key";
 import { TOKENS } from "../../lib/di/tokens";
 import { container } from "../../lib/di/container";
 const productController = container.resolve(TOKENS.ProductController);
@@ -14,5 +15,8 @@ productRouter.get("/products/:id", productController.findById);
 productRouter.get("/restaurants/:restaurantId/products", authenticate, requireRestaurantMember('restaurantId'), rbac({ resource: "core:product", action: "read" }), productController.findByRestaurant);
 productRouter.post("/restaurants/:restaurantId/products", authenticate, requireRestaurantMember('restaurantId'), rbac({ resource: "core:product", action: "create" }), productController.create);
 productRouter.patch("/products/:id", authenticate, rbac({ resource: "core:product", action: "update" }), productController.update);
+// Internal (service-to-service)
+productRouter.get('/internal/branches/:id/products', requireInternalApiKey, productController.findByBranchAndIds);
+productRouter.post('/internal/branches/:id/reserve-stock', requireInternalApiKey, productController.reserveStock);
 export default productRouter;
 //# sourceMappingURL=routes.js.map

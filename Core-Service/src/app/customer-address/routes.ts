@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../../lib/auth/gaurd";
+import { requireInternalApiKey } from "../../lib/auth/api-key";
 import { CustomerAddressController} from "./controller/customer-address.controller";
 import { TOKENS } from "../../lib/di/tokens";
 import { container } from "../../lib/di/container";
@@ -32,5 +33,8 @@ customerAddressRouter.delete(
     authenticate,
     customerAddressController.deleteAddress
 );
+
+// Internal (service-to-service)
+customerAddressRouter.get('/internal/:id', requireInternalApiKey, customerAddressController.getById);
 
 export default customerAddressRouter;

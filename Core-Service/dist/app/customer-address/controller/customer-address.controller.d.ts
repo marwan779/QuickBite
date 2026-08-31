@@ -7,5 +7,6 @@ export declare class CustomerAddressController {
     addAddress: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateAddress: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     deleteAddress: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    getById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 //# sourceMappingURL=customer-address.controller.d.ts.map

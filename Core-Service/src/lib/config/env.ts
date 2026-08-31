@@ -58,7 +58,7 @@ export const env = {
             import.meta.dirname,
             "../../migrations"
         ),
-        MigrationExtension: parsed.DB_MIGRATION_EXTENSION,
+        migrationExtension: parsed.DB_MIGRATION_EXTENSION,
     },
     jwt: {
         refreshSecret: parsed.REFRESH_SECRET,
@@ -66,6 +66,7 @@ export const env = {
         accessExpiresIn: parsed.ACCESS_EXPIRES_IN,
         refreshExpiresIn: parsed.REFRESH_EXPIRES_IN,
     },
+    isProduction: process.env.NODE_ENV === "production",
     cors: {
         origins: parsed.CORS_ORIGINS.split(','),
     },
@@ -80,6 +81,9 @@ export const env = {
         secretKey: parsed.MAILJET_SECRET_KEY,
         fromEmail: parsed.MAILJET_FROM_EMAIL,
         fromName: parsed.MAILJET_FROM_NAME,
+    },
+    internal: {
+        apiKey: parsed.INTERNAL_API_KEY,
     },
     rabbit: {
         url: parsed.RABBITMQ_URL,

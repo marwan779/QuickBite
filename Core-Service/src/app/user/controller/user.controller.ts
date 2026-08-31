@@ -28,4 +28,13 @@ export class UserController {
             next(err);
         }
     }
+
+    getAgentById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const agent = await this.userService.getAgentById(Number(req.params.id));
+            res.status(200).json({ data: agent });
+        } catch (err) {
+            next(err);
+        }
+    }
 }

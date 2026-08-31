@@ -9,6 +9,7 @@ export declare class ProductController {
     findById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     create: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     update: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    findByBranchAndIds: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     reserveStock: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 //# sourceMappingURL=product.controller.d.ts.map

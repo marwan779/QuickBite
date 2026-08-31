@@ -5,6 +5,8 @@ import { validateBody } from "../../../lib/validation/validate";
 import { TOKENS } from "../../../lib/di/tokens";
 import { injectable, inject } from "tsyringe";
 import { parsePaginationQuery } from "../../../lib/http/pagination/parse-query";
+import { BranchNotFoundError } from "../error";
+import { sendSuccess } from "../../../lib/http/response";
 
 @injectable()
 export class BranchController {
@@ -70,6 +72,32 @@ export class BranchController {
             const data = await validateBody(UpdateBranchStatusDTO, req.body);
             const branch = await this.branchService.updateStatus(Number(req.params.branchId), data);
             res.status(200).json({ message: "Branch status updated", branch });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    findByIdWithRestaurant = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = Number(req.params.id);
+            const result = await this.branchService.findByIdWithRestaurant(id);
+            if (!result) throw BranchNotFoundError;
+            const { branch, restaurantStatus } = result;
+            sendSuccess(res, {
+                id: branch.id,
+                restaurantId: branch.restaurantId,
+                restaurantStatus,
+                region: branch.countryCode,
+                isActive: branch.isActive,
+                acceptOrders: branch.acceptOrders,
+                deliveryFee: branch.deliveryFee,
+                commissionBps: branch.commission,
+                currency: branch.currency,
+                lat: Number(branch.lat),
+                lng: Number(branch.lng),
+                name: branch.label,
+                addressText: branch.addressText,
+            });
         } catch (err) {
             next(err);
         }

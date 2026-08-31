@@ -1,5 +1,5 @@
 import type { UpdateUserDTO } from "../dto/user.dto";
-import type { SystemRole } from "../enums";
+import { SystemRole } from "../enums";
 import type { Knex } from "knex";
 export interface CreateUserData {
     email: string;
@@ -9,7 +9,7 @@ export interface CreateUserData {
     systemRole: SystemRole;
 }
 export declare class UserService {
-    create: (data: CreateUserData, trx?: Knex.Transaction) => Promise<import("../entity/user").User>;
+    create: (data: CreateUserData, trx?: Knex | Knex.Transaction) => Promise<import("../entity/user").User>;
     getByUserId: (userId: number) => Promise<{
         id: number;
         email: string;
@@ -23,6 +23,11 @@ export declare class UserService {
         name: string;
         phone: string;
         systemRole: SystemRole;
+    }>;
+    getAgentById: (id: number) => Promise<{
+        id: number;
+        name: string;
+        phone: string;
     }>;
 }
 export declare const userService: UserService;

@@ -13,7 +13,7 @@ const config = {
     },
     migrations: {
         directory: env.db.migrationDirectory,
-        extension: env.db.MigrationExtension
+        extension: env.db.migrationExtension
     }
 };
 export default config;

@@ -6,4 +6,5 @@ export const MemberNotFoundError = new AppError('Member not found', 404);
 export const CannotDeleteOwnerError = new AppError('Cannot delete the restaurant owner', 400);
 export const NotAuthorizedErrorToManageRestaurant = new AppError('You are not authorized to manage this restaurant', 403);
 export const NotAuthorizedErrorToManageBranches = new AppError('You are not authorized to manage these branches', 403);
+export const RoleQueryRequiredError = new AppError('role query parameter is required', 400);
 

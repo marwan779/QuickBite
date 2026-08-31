@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {requireRestaurantMember, rbac} from "../../lib/auth/rbac";
+import {requireInternalApiKey} from "../../lib/auth/api-key";
 import {MemberController} from "./controller/member.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { container } from "../../lib/di/container";
@@ -9,15 +10,18 @@ const memberController = container.resolve<MemberController>(TOKENS.MemberContro
 
 export const rbacRouter = Router();
 
+// GET role permissions is public
+rbacRouter.get('/roles/:role/permissions', memberController.getRolePermissions);
+
+// Internal (service-to-service)
+rbacRouter.get('/internal/rbac/permissions', requireInternalApiKey, memberController.getPermissionsByRole);
+
 rbacRouter.post('/restaurants/:restaurantId/members',
     authenticate,
     requireRestaurantMember('restaurantId'),
     rbac({resource:"core:member", action:'create'}),
     memberController.createMember
 );
-
-// GET role permissions is public
-rbacRouter.get('/roles/:role/permissions', memberController.getRolePermissions);
 
 rbacRouter.get('/restaurants/:restaurantId/members',
     authenticate,

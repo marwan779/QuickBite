@@ -12,6 +12,23 @@ let CustomerAddressService = class CustomerAddressService {
         const addresses = await findAddressesByUserId(userId);
         return addresses;
     };
+    getById = async (id) => {
+        const address = await findAddressById(id);
+        if (!address)
+            throw AddressNotFoundError;
+        return {
+            id: address.id,
+            userId: address.user_id,
+            label: address.label,
+            country: address.country,
+            city: address.city,
+            street: address.street,
+            building: address.building,
+            apartmentNumber: address.apartment_number,
+            lat: address.lat,
+            lng: address.lng,
+        };
+    };
     addAddress = async (userId, data) => {
         const address = await createAddress(userId, data);
         return address;

@@ -4,6 +4,7 @@ import {CreateMemberDTO, UpdateMemberBranchesDTO, UpdateMemberDTO} from "../dto/
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
 import type { MemberService } from "../service/member.service";
+import { RoleQueryRequiredError } from "../errors";
 
 
 @injectable()
@@ -53,12 +54,21 @@ export class MemberController {
     }
 
     getRolePermissions = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        // Cast the param to a string so TypeScript knows it's safe
-        const roleName = req.params.role as string;
-        const result = await this.memberService.getRolePermissions(roleName);
-        res.status(200).json(result);
-    } catch (error) { next(error); }
-}
+        try {
+            // Cast the param to a string so TypeScript knows it's safe
+            const roleName = req.params.role as string;
+            const result = await this.memberService.getRolePermissions(roleName);
+            res.status(200).json(result);
+        } catch (error) { next(error); }
+    }
+
+    getPermissionsByRole = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const role = String(req.query.role ?? "");
+            if (!role) throw RoleQueryRequiredError;
+            const result = await this.memberService.getPermissionsByRole(role);
+            res.status(200).json(result);
+        } catch (error) { next(error); }
+    }
 }
 

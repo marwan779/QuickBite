@@ -14,6 +14,7 @@ import { validateBody } from "../../../lib/validation/validate";
 import { CreateMemberDTO, UpdateMemberBranchesDTO, UpdateMemberDTO } from "../dto/member.dto";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
+import { RoleQueryRequiredError } from "../errors";
 let MemberController = class MemberController {
     memberService;
     constructor(memberService) {
@@ -72,6 +73,18 @@ let MemberController = class MemberController {
             // Cast the param to a string so TypeScript knows it's safe
             const roleName = req.params.role;
             const result = await this.memberService.getRolePermissions(roleName);
+            res.status(200).json(result);
+        }
+        catch (error) {
+            next(error);
+        }
+    };
+    getPermissionsByRole = async (req, res, next) => {
+        try {
+            const role = String(req.query.role ?? "");
+            if (!role)
+                throw RoleQueryRequiredError;
+            const result = await this.memberService.getPermissionsByRole(role);
             res.status(200).json(result);
         }
         catch (error) {

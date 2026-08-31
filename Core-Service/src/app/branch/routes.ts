@@ -2,6 +2,7 @@ import { Router } from "express";
 import { BranchController} from "./controller/branch.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { rbac, requireBranchAccess, requireRestaurantMember } from "../../lib/auth/rbac";
+import { requireInternalApiKey } from "../../lib/auth/api-key";
 import { container } from "../../lib/di/container";
 import { TOKENS } from "../../lib/di/tokens";
 import { withCache } from "../../lib/cache/withcache";
@@ -13,6 +14,9 @@ const branchController = container.resolve<BranchController>(TOKENS.BranchContro
 export const branchRouter = Router();
 
 branchRouter.get('/branches/nearby', withCache(), branchController.findNearby);
+
+// Internal (service-to-service)
+branchRouter.get('/internal/branches/:id', requireInternalApiKey, branchController.findByIdWithRestaurant);
 
 branchRouter.post(
     '/restaurants/:restaurantId/branches',

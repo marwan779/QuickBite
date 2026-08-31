@@ -16,6 +16,13 @@ let BranchService = class BranchService {
         const rows = await findNearbyBranches(lat, lng);
         return rows;
     };
+    findByIdWithRestaurant = async (branchId) => {
+        const branch = await findBranchById(branchId);
+        if (!branch)
+            return null;
+        const restaurant = await findRestaurantById(branch.restaurantId);
+        return { branch, restaurantStatus: restaurant?.status ?? "unknown" };
+    };
     create = async (restaurantId, data) => {
         const restaurant = await findRestaurantById(restaurantId);
         if (!restaurant)

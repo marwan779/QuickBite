@@ -1,20 +1,14 @@
 import { Router } from "express";
 import { RestaurantController } from "./controller/restaurant.controller";
 import { authenticate } from "../../lib/auth/gaurd";
-import { authorize } from "../../lib/auth/authorize";
-import { SystemRole } from "../user/enums";
+import { rbac, requireRestaurantMember } from "../../lib/auth/rbac";
 import { container } from "../../lib/di/container";
 import { TOKENS } from "../../lib/di/tokens";
 const restaurantController = container.resolve(TOKENS.RestaurantController);
 export const restaurantRouter = Router();
 restaurantRouter.get('/', restaurantController.getAll);
 restaurantRouter.get('/:id', restaurantController.getById);
-// Protected routes - require authentication
-restaurantRouter.use(authenticate);
-// Restaurant user can create their own restaurant (standalone)
-restaurantRouter.post('/', authorize([SystemRole.RESTAURANT_USER, SystemRole.SYSTEM_ADMIN]), restaurantController.create);
-// Restaurant user can update their own restaurant
-restaurantRouter.patch('/:id', authorize([SystemRole.RESTAURANT_USER, SystemRole.SYSTEM_ADMIN]), restaurantController.update);
-// System admin can update restaurant status
-restaurantRouter.patch('/:id/status', authorize([SystemRole.SYSTEM_ADMIN]), restaurantController.updateStatus);
+restaurantRouter.post('/', authenticate, restaurantController.create); // system_admin only, checked in service
+restaurantRouter.patch('/:id', authenticate, requireRestaurantMember('id'), rbac({ resource: "core:restaurant", action: 'update' }), restaurantController.update);
+restaurantRouter.patch('/:id/status', authenticate, restaurantController.updateStatus); // system_admin only, checked in service
 //# sourceMappingURL=routes.js.map

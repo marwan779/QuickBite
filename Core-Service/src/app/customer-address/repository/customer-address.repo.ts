@@ -58,14 +58,13 @@ export const createAddress = async (
 
 export const findAddressById = async (
     addressId: number,
-    userId: number
+    userId?: number
 ) => {
-    return db("customer_addresses")
-        .where({
-            id: addressId,
-            user_id: userId,
-        })
-        .first();
+    const query = db("customer_addresses").where({ id: addressId });
+    if (userId !== undefined) {
+        query.where({ user_id: userId });
+    }
+    return query.first();
 };
 
 

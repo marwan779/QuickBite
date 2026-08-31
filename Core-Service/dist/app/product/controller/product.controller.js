@@ -16,7 +16,7 @@ import { validateBody } from "../../../lib/validation/validate";
 import { TOKENS } from "../../../lib/di/tokens";
 import { injectable, inject } from "tsyringe";
 import { sendSuccess } from "../../../lib/http/response";
-import { InvalidReserveItemsError } from "../errors";
+import { InvalidReserveItemsError, MissingProductIdsQueryError } from "../errors";
 let ProductController = class ProductController {
     productService;
     constructor(productService) {
@@ -97,6 +97,20 @@ let ProductController = class ProductController {
                     branchDetails: result.branchDetails,
                 }),
             });
+        }
+        catch (err) {
+            next(err);
+        }
+    };
+    findByBranchAndIds = async (req, res, next) => {
+        try {
+            const branchId = Number(req.params.id);
+            const raw = typeof req.query.ids === "string" ? req.query.ids : "";
+            const ids = raw.split(",").map((s) => Number(s.trim())).filter((n) => Number.isInteger(n) && n > 0);
+            if (ids.length === 0)
+                throw MissingProductIdsQueryError;
+            const products = await this.productService.findByBranchAndIds(branchId, ids);
+            sendSuccess(res, products);
         }
         catch (err) {
             next(err);

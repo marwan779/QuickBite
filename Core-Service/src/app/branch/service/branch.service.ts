@@ -2,6 +2,7 @@ import { NotFoundError } from "../../../lib/auth/error";
 import type { PaginationParams } from "../../../lib/http/pagination/cursor-pagination";
 import { findRestaurantById } from "../../restaurant/repository/restaurant.repo";
 import type { CreateBranchDTO, UpdateBranchDTO, UpdateBranchStatusDTO } from "../dto/branch.dto";
+import type { BranchWithRestaurant } from "../types";
 import {
     findNearbyBranches,
     createBranch,
@@ -22,6 +23,13 @@ export class BranchService {
     findNearby = async (lat: number, lng: number): Promise<NearbyBranch[]> => {
         const rows = await findNearbyBranches(lat, lng);
         return rows;
+    }
+
+    findByIdWithRestaurant = async (branchId: number): Promise<BranchWithRestaurant | null> => {
+        const branch = await findBranchById(branchId);
+        if (!branch) return null;
+        const restaurant = await findRestaurantById(branch.restaurantId);
+        return { branch, restaurantStatus: restaurant?.status ?? "unknown" };
     }
 
     create = async (restaurantId: number, data: CreateBranchDTO) => {

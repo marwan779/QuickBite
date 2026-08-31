@@ -28,5 +28,9 @@ export declare class MemberService {
         role: string;
         permissions: any[];
     }>;
+    getPermissionsByRole(roleName: string): Promise<{
+        role: string;
+        permissions: string[];
+    }>;
 }
 //# sourceMappingURL=member.service.d.ts.map

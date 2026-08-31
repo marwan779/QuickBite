@@ -4,8 +4,9 @@ import { validateBody } from "../../../lib/validation/validate";
 import { CreateRestaurantDTO, UpdateRestaurantDTO, UpdateRestaurantStatusDTO } from "../dto/restaurant.dto";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
-import { sendPaginated } from "../../../lib/http/response";
+import { sendPaginated, sendSuccess } from "../../../lib/http/response";
 import { parseFilters, parsePaginationQuery } from "../../../lib/http/pagination/parse-query";
+import type { SystemRole } from "../../user/enums";
 
 @injectable()
 export class RestaurantController {
@@ -35,9 +36,8 @@ export class RestaurantController {
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const data = await validateBody(CreateRestaurantDTO, req.body);
-            // Standalone create for system admins (uses default db connection, not transaction)
-            const result = await this.restaurantService.create(req.user!.userId, data as any);
-            res.status(201).json({ message: "Restaurant created", data: result });
+            const result = await this.restaurantService.createWithOwner(req.user?.role! as SystemRole, data);
+            sendSuccess(res, result, 201);
         } catch (err) {
             next(err);
         }
@@ -56,7 +56,7 @@ export class RestaurantController {
     updateStatus = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const data = await validateBody(UpdateRestaurantStatusDTO, req.body);
-            const result = await this.restaurantService.updateStatus(Number(req.params.id), data.status);
+            const result = await this.restaurantService.updateStatus(Number(req.params.id), req.user?.role! as SystemRole, data);
             res.status(200).json({ message: "Restaurant status updated", data: result });
         } catch (err) {
             next(err);

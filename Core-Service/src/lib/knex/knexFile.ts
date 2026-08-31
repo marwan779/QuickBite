@@ -15,7 +15,7 @@ const config: Knex.Config = {
     },
     migrations: {
         directory: env.db.migrationDirectory,
-        extension: env.db.MigrationExtension
+        extension: env.db.migrationExtension
     }
 }
 

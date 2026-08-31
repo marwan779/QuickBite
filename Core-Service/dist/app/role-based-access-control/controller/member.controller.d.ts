@@ -9,5 +9,6 @@ export declare class MemberController {
     deleteMember: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateMemberBranches: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     getRolePermissions: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    getPermissionsByRole: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 //# sourceMappingURL=member.controller.d.ts.map

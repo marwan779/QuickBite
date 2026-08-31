@@ -1,7 +1,7 @@
 import { UserAlreadyExistsError } from "../../auth/errors";
 import { hashPassword } from "../../auth/utils";
 import type { UpdateUserDTO } from "../dto/user.dto";
-import type { SystemRole } from "../enums";
+import { SystemRole } from "../enums";
 import { UserNotFoundError } from "../errors";
 import {createUser, findUserById, findUserExistsByEmailOrPhone, updateUser} from "../repository/users.repo";
 import type { Knex } from "knex";
@@ -17,7 +17,7 @@ export interface CreateUserData {
 
 @injectable()
 export class UserService {
-create = async (data: CreateUserData, trx?: Knex.Transaction) => {
+    create = async (data: CreateUserData, trx?: Knex | Knex.Transaction) => {
         const exists = await findUserExistsByEmailOrPhone(data.email, data.phone);
         if (exists) {
             throw UserAlreadyExistsError;
@@ -34,7 +34,7 @@ create = async (data: CreateUserData, trx?: Knex.Transaction) => {
             systemRole: data.systemRole,
             createdAt: now,
             updatedAt: now,
-        }, trx!); // Notice trx injection
+        }, trx as Knex.Transaction);
     }
 
 
@@ -67,5 +67,14 @@ create = async (data: CreateUserData, trx?: Knex.Transaction) => {
         };
     }
 
+    getAgentById = async (id: number) => {
+        const user = await findUserById(id);
+        if (!user) throw UserNotFoundError;
+        if (user.systemRole !== SystemRole.DELIVERY_AGENT) {
+            // Use UserNotFoundError to avoid enumeration of other user types.
+            throw UserNotFoundError;
+        }
+        return { id: user.id, name: user.name, phone: user.phone };
+    }
 }
 export const userService = new UserService();

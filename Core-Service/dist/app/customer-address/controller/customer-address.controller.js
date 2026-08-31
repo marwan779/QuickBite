@@ -83,6 +83,15 @@ let CustomerAddressController = class CustomerAddressController {
             next(err);
         }
     };
+    getById = async (req, res, next) => {
+        try {
+            const address = await this.customerAddressService.getById(Number(req.params.id));
+            res.status(200).json({ data: address });
+        }
+        catch (err) {
+            next(err);
+        }
+    };
 };
 CustomerAddressController = __decorate([
     injectable(),

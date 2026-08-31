@@ -22,7 +22,7 @@ import { CannotCreateOwnerUserError, RoleNotFoundError, MemberNotFoundError, Can
 import { setMemberBranches, countBranchesByIdsAndRestaurant } from "../repository/member-branch.repo";
 import { createRestaurantMember, findMembersByRestaurantId, findMemberWithRoleName, updateMember, deleteMember } from "../repository/restaurant_member.repo";
 import { findRoleByName } from "../repository/role.repo";
-import { getPermissionsDetailsByRoleName } from "../repository/permission.repo";
+import { getPermissionsDetailsByRoleName, getPermissionsByRoleName } from "../repository/permission.repo";
 import { BranchesNotBelongToRestaurantError } from "../../branch/error";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
@@ -202,6 +202,10 @@ let MemberService = class MemberService {
             role: roleName,
             permissions: permissions.map(p => p.permission) // Returns array of 'resource:action' strings
         };
+    }
+    async getPermissionsByRole(roleName) {
+        const permissions = await getPermissionsByRoleName(roleName);
+        return { role: roleName, permissions };
     }
 };
 MemberService = __decorate([

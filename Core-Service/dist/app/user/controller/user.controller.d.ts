@@ -5,5 +5,6 @@ export declare class UserController {
     constructor(userService: UserService);
     getMe: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateMe: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    getAgentById: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 //# sourceMappingURL=user.controller.d.ts.map

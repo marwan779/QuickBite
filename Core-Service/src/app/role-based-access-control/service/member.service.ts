@@ -28,7 +28,7 @@ import {
     deleteMember
 } from "../repository/restaurant_member.repo";
 import { findRoleByName } from "../repository/role.repo";
-import { getPermissionsDetailsByRoleName } from "../repository/permission.repo";
+import { getPermissionsDetailsByRoleName, getPermissionsByRoleName } from "../repository/permission.repo";
 import { BranchesNotBelongToRestaurantError } from "../../branch/error";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../../lib/di/tokens";
@@ -238,6 +238,11 @@ export class MemberService {
             role: roleName,
             permissions: permissions.map(p => p.permission) // Returns array of 'resource:action' strings
         };
+    }
+
+    async getPermissionsByRole(roleName: string) {
+        const permissions = await getPermissionsByRoleName(roleName);
+        return { role: roleName, permissions };
     }
 }
 

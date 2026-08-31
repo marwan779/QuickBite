@@ -8,5 +8,6 @@ export declare class BranchController {
     findByRestaurant: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     update: (req: Request, res: Response, next: NextFunction) => Promise<void>;
     updateStatus: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+    findByIdWithRestaurant: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 }
 //# sourceMappingURL=branch.controller.d.ts.map

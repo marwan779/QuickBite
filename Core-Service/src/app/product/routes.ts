@@ -3,6 +3,7 @@ import { Router } from "express";
 import { ProductController} from "./controller/product.controller";
 import { authenticate } from "../../lib/auth/gaurd";
 import { rbac, requireRestaurantMember } from "../../lib/auth/rbac";
+import { requireInternalApiKey } from "../../lib/auth/api-key";
 import { TOKENS } from "../../lib/di/tokens";
 import { container } from "../../lib/di/container";
 
@@ -49,5 +50,9 @@ productRouter.patch(
     rbac({ resource: "core:product", action: "update" }),
     productController.update
 );
+
+// Internal (service-to-service)
+productRouter.get('/internal/branches/:id/products', requireInternalApiKey, productController.findByBranchAndIds);
+productRouter.post('/internal/branches/:id/reserve-stock', requireInternalApiKey, productController.reserveStock);
 
 export default productRouter;

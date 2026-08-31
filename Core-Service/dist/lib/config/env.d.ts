@@ -8,7 +8,7 @@ export declare const env: {
         name: string;
         poolMax: number;
         migrationDirectory: string;
-        MigrationExtension: string;
+        migrationExtension: string;
     };
     jwt: {
         refreshSecret: string;
@@ -16,6 +16,7 @@ export declare const env: {
         accessExpiresIn: string;
         refreshExpiresIn: string;
     };
+    isProduction: boolean;
     cors: {
         origins: string[];
     };
@@ -29,6 +30,9 @@ export declare const env: {
         secretKey: string;
         fromEmail: string;
         fromName: string;
+    };
+    internal: {
+        apiKey: string;
     };
     rabbit: {
         url: string;

@@ -12,6 +12,23 @@ export class CustomerAddressService {
         return addresses;
     };
 
+    getById = async (id: number) => {
+        const address = await findAddressById(id);
+        if (!address) throw AddressNotFoundError;
+        return {
+            id: address.id,
+            userId: address.user_id,
+            label: address.label,
+            country: address.country,
+            city: address.city,
+            street: address.street,
+            building: address.building,
+            apartmentNumber: address.apartment_number,
+            lat: address.lat,
+            lng: address.lng,
+        };
+    };
+
 
     addAddress = async (
         userId: number,

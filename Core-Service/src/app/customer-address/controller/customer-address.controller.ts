@@ -131,6 +131,15 @@ export class CustomerAddressController {
             next(err);
         }
     };
+
+    getById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const address = await this.customerAddressService.getById(Number(req.params.id));
+            res.status(200).json({ data: address });
+        } catch (err) {
+            next(err);
+        }
+    };
 }
 
 

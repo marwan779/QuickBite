@@ -40,6 +40,15 @@ let UserController = class UserController {
             next(err);
         }
     };
+    getAgentById = async (req, res, next) => {
+        try {
+            const agent = await this.userService.getAgentById(Number(req.params.id));
+            res.status(200).json({ data: agent });
+        }
+        catch (err) {
+            next(err);
+        }
+    };
 };
 UserController = __decorate([
     injectable(),

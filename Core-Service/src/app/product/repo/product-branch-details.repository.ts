@@ -1,4 +1,5 @@
 
+import type { Knex } from "knex";
 import { db } from "../../../lib/knex/knex";
 import type {
     UpdateProductDTO,
@@ -7,9 +8,10 @@ import type {
 
 export const findBranchDetails = async (
     productId: number,
-    branchId: number
+    branchId: number,
+    conn: Knex = db
 ) => {
-    return db("product_branch_details")
+    return conn("product_branch_details")
         .where({
             product_id: productId,
             branch_id: branchId,
@@ -29,7 +31,8 @@ export const findBranchDetails = async (
 export const updateBranchDetails = async (
     productId: number,
     branchId: number,
-    data: UpdateProductDTO
+    data: UpdateProductDTO,
+    conn: Knex = db
 ) => {
     const updateData: Record<string, unknown> = {};
 
@@ -46,10 +49,10 @@ export const updateBranchDetails = async (
     }
 
     if (Object.keys(updateData).length === 0) {
-        return findBranchDetails(productId, branchId);
+        return findBranchDetails(productId, branchId, conn);
     }
 
-    const [details] = await db("product_branch_details")
+    const [details] = await conn("product_branch_details")
         .where({
             product_id: productId,
             branch_id: branchId,

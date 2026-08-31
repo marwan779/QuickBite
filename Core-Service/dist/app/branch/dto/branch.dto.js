@@ -18,6 +18,7 @@ export class CreateBranchDTO {
     opensAt;
     closesAt;
     deliveryRadius;
+    deliveryFee;
     currency;
 }
 __decorate([
@@ -57,6 +58,12 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateBranchDTO.prototype, "deliveryRadius", void 0);
 __decorate([
+    IsOptional(),
+    IsInt(),
+    Min(0),
+    __metadata("design:type", Number)
+], CreateBranchDTO.prototype, "deliveryFee", void 0);
+__decorate([
     IsEnum(Currency),
     __metadata("design:type", String)
 ], CreateBranchDTO.prototype, "currency", void 0);
@@ -69,6 +76,7 @@ export class UpdateBranchDTO {
     opensAt;
     closesAt;
     deliveryRadius;
+    deliveryFee;
     currency;
     isActive;
     acceptOrders;
@@ -120,6 +128,12 @@ __decorate([
     Min(0),
     __metadata("design:type", Number)
 ], UpdateBranchDTO.prototype, "deliveryRadius", void 0);
+__decorate([
+    IsOptional(),
+    IsInt(),
+    Min(0),
+    __metadata("design:type", Number)
+], UpdateBranchDTO.prototype, "deliveryFee", void 0);
 __decorate([
     IsOptional(),
     IsEnum(Currency),

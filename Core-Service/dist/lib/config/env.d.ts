@@ -30,5 +30,11 @@ export declare const env: {
         fromEmail: string;
         fromName: string;
     };
+    rabbit: {
+        url: string;
+        exchange: string;
+        drainCron: string;
+        batchSize: number;
+    };
 };
 //# sourceMappingURL=env.d.ts.map

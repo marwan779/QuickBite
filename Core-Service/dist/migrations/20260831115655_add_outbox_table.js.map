@@ -1,0 +1,1 @@
+{"version":3,"file":"20260831115655_add_outbox_table.js","sourceRoot":"","sources":["../../src/migrations/20260831115655_add_outbox_table.ts"],"names":[],"mappings":"AAGA,MAAM,CAAC,KAAK,UAAU,EAAE,CAAC,IAAU;IAC/B,MAAM,IAAI,CAAC,GAAG,CAAC;;;;;;;;;;;;;;;;KAgBd,CAAC,CAAC;AACP,CAAC;AAED,MAAM,CAAC,KAAK,UAAU,IAAI,CAAC,IAAU;IACjC,MAAM,IAAI,CAAC,GAAG,CAAC,qCAAqC,CAAC,CAAC;AAC1D,CAAC"}

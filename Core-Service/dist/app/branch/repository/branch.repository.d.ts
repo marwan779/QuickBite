@@ -16,7 +16,7 @@ export interface NearbyBranch {
 }
 export declare function createBranch(data: Partial<Branch>, conn?: Knex): Promise<Branch>;
 export declare function findBranchesByRestaurant(restaurantId: number, pagination: PaginationParams): Promise<Branch[]>;
-export declare function findBranchById(id: number): Promise<Branch | undefined>;
+export declare function findBranchById(id: number, conn?: Knex): Promise<Branch | undefined>;
 export declare function updateBranch(id: number, data: Partial<Branch>, conn?: Knex): Promise<Branch>;
 export declare function updateBranchStatus(id: number, isActive: boolean, conn?: Knex): Promise<Branch>;
 export declare function findNearbyBranches(lat: number, lng: number): Promise<NearbyBranch[]>;

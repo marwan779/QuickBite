@@ -23,3 +23,10 @@ export const InvalidBranchIdError = new AppError(
     "Invalid branch ID",
     400
 );
+
+export const InvalidReserveItemsError = new AppError('items must be a non-empty array of {productId, quantity}', 400);
+export const MissingProductIdsQueryError = new AppError('ids query is required', 400);
+
+export function outOfStockError(offending: unknown) {
+    return new AppError(`OutOfStock: ${JSON.stringify(offending)}`, 409);
+}

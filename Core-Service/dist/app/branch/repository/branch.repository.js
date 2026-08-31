@@ -3,7 +3,7 @@ import { Branch } from "../entity/branch.entity";
 import { applyCursorPagination } from "../../../lib/http/pagination/cursor-pagination";
 const BRANCH_COLUMNS = ['id', 'restaurant_id', 'country_code', 'address_text', 'label', 'lat', 'lng',
     'is_active', 'opens_at', 'closes_at', 'accept_orders', 'created_at', 'updated_at',
-    'delivery_radius', 'currency', 'commission', 'location'];
+    'delivery_radius', 'delivery_fee', 'currency', 'commission', 'location'];
 function toEntity(row) {
     return new Branch({
         id: row.id,
@@ -20,6 +20,7 @@ function toEntity(row) {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         deliveryRadius: row.delivery_radius,
+        deliveryFee: row.delivery_fee ?? 0,
         currency: row.currency,
         commission: row.commission,
         location: row.location
@@ -40,6 +41,7 @@ export async function createBranch(data, conn = db) {
         created_at: data.createdAt,
         updated_at: data.updatedAt,
         delivery_radius: data.deliveryRadius,
+        delivery_fee: data.deliveryFee ?? 0,
         currency: data.currency,
         commission: data.commission
     }).returning(BRANCH_COLUMNS);
@@ -53,8 +55,8 @@ export async function findBranchesByRestaurant(restaurantId, pagination) {
     const rows = await query;
     return rows.map(toEntity);
 }
-export async function findBranchById(id) {
-    const row = await db("restaurant_branches")
+export async function findBranchById(id, conn = db) {
+    const row = await conn("restaurant_branches")
         .where({ id })
         .select(BRANCH_COLUMNS)
         .first();
@@ -82,6 +84,8 @@ export async function updateBranch(id, data, conn = db) {
         updateData.accept_orders = data.acceptOrders;
     if (data.deliveryRadius !== undefined)
         updateData.delivery_radius = data.deliveryRadius;
+    if (data.deliveryFee !== undefined)
+        updateData.delivery_fee = data.deliveryFee;
     if (data.currency !== undefined)
         updateData.currency = data.currency;
     if (data.commission !== undefined)

@@ -15,6 +15,8 @@ import { CreateProductDTO, UpdateProductDTO, } from "../dto/product.dto";
 import { validateBody } from "../../../lib/validation/validate";
 import { TOKENS } from "../../../lib/di/tokens";
 import { injectable, inject } from "tsyringe";
+import { sendSuccess } from "../../../lib/http/response";
+import { InvalidReserveItemsError } from "../errors";
 let ProductController = class ProductController {
     productService;
     constructor(productService) {
@@ -95,6 +97,20 @@ let ProductController = class ProductController {
                     branchDetails: result.branchDetails,
                 }),
             });
+        }
+        catch (err) {
+            next(err);
+        }
+    };
+    reserveStock = async (req, res, next) => {
+        try {
+            const branchId = Number(req.params.id);
+            const items = req.body?.items;
+            if (!Array.isArray(items) || items.length === 0) {
+                throw InvalidReserveItemsError;
+            }
+            const result = await this.productService.reserveStock(branchId, items);
+            sendSuccess(res, result);
         }
         catch (err) {
             next(err);

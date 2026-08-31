@@ -6,8 +6,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { NotFoundError } from "../../../lib/auth/error";
 import { findRestaurantById } from "../../restaurant/repository/restaurant.repo";
-import { findNearbyBranches, createBranch, findBranchesByRestaurant, findBranchById, updateBranch, updateBranchStatus } from "../repository/branch.repository";
+import { findNearbyBranches, createBranch, findBranchesByRestaurant, findBranchById, updateBranch, updateBranchStatus, } from "../repository/branch.repository";
 import { injectable } from "tsyringe";
+import { db } from "../../../lib/knex/knex";
+import { insertOutboxEvent } from "../../../lib/events/outbox.repo";
+import { EVENT_TYPES } from "../../../lib/events/event-types";
 let BranchService = class BranchService {
     findNearby = async (lat, lng) => {
         const rows = await findNearbyBranches(lat, lng);
@@ -30,6 +33,7 @@ let BranchService = class BranchService {
             closesAt: data.closesAt,
             currency: data.currency,
             deliveryRadius: data.deliveryRadius,
+            deliveryFee: data.deliveryFee ?? 0,
             commission: 0,
             createdAt: now,
             updatedAt: now,
@@ -45,16 +49,94 @@ let BranchService = class BranchService {
         return findBranchesByRestaurant(restaurantId, pagination);
     };
     update = async (branchId, data) => {
-        const branch = await findBranchById(branchId);
-        if (!branch)
-            throw NotFoundError;
-        return updateBranch(branchId, data);
+        const trx = await db.transaction();
+        try {
+            const existing = await findBranchById(branchId, trx);
+            if (!existing)
+                throw NotFoundError;
+            const updated = await updateBranch(branchId, data, trx);
+            await insertOutboxEvent(trx, {
+                aggregateType: "branch",
+                aggregateId: String(branchId),
+                eventType: EVENT_TYPES.BRANCH_UPDATED,
+                payload: {
+                    branchId: updated.id,
+                    restaurantId: updated.restaurantId,
+                    label: updated.label,
+                    isActive: updated.isActive,
+                    acceptOrders: updated.acceptOrders,
+                    opensAt: updated.opensAt,
+                    closesAt: updated.closesAt,
+                    deliveryRadius: updated.deliveryRadius,
+                    deliveryFee: updated.deliveryFee,
+                    currency: updated.currency,
+                    countryCode: updated.countryCode,
+                    addressText: updated.addressText,
+                    lat: updated.lat,
+                    lng: updated.lng,
+                },
+            });
+            if (data.isActive === false || (existing.isActive && !updated.isActive)) {
+                await insertOutboxEvent(trx, {
+                    aggregateType: "branch",
+                    aggregateId: String(branchId),
+                    eventType: EVENT_TYPES.BRANCH_DEACTIVATED,
+                    payload: {
+                        branchId: updated.id,
+                        restaurantId: updated.restaurantId,
+                    },
+                });
+            }
+            await trx.commit();
+            return updated;
+        }
+        catch (err) {
+            await trx.rollback();
+            throw err;
+        }
     };
     updateStatus = async (branchId, data) => {
-        const branch = await findBranchById(branchId);
-        if (!branch)
-            throw NotFoundError;
-        return updateBranchStatus(branchId, data.isActive);
+        const trx = await db.transaction();
+        try {
+            const existing = await findBranchById(branchId, trx);
+            if (!existing)
+                throw NotFoundError;
+            const updated = await updateBranchStatus(branchId, data.isActive, trx);
+            await insertOutboxEvent(trx, {
+                aggregateType: "branch",
+                aggregateId: String(branchId),
+                eventType: EVENT_TYPES.BRANCH_UPDATED,
+                payload: {
+                    branchId: updated.id,
+                    restaurantId: updated.restaurantId,
+                    label: updated.label,
+                    isActive: updated.isActive,
+                    acceptOrders: updated.acceptOrders,
+                    opensAt: updated.opensAt,
+                    closesAt: updated.closesAt,
+                    deliveryRadius: updated.deliveryRadius,
+                    deliveryFee: updated.deliveryFee,
+                    currency: updated.currency,
+                },
+            });
+            if (!data.isActive) {
+                await insertOutboxEvent(trx, {
+                    aggregateType: "branch",
+                    aggregateId: String(branchId),
+                    eventType: EVENT_TYPES.BRANCH_DEACTIVATED,
+                    payload: {
+                        branchId: updated.id,
+                        restaurantId: updated.restaurantId,
+                    },
+                });
+            }
+            await trx.commit();
+            return updated;
+        }
+        catch (err) {
+            await trx.rollback();
+            throw err;
+        }
     };
 };
 BranchService = __decorate([

@@ -4,106 +4,193 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-import { BranchProductDetailsNotFoundError, ProductNotFoundError, } from "../errors";
-import {} from "../../restaurant/service/restaurant.service";
-import { createCategory, findCategoriesByRestaurant, findCategoryByName } from "../repo/category.repository";
-import { createProduct, findProductById, findProductsByBranch, findProductsByRestaurant, updateProduct } from "../repo/product.repository";
-import { findBranchDetails, updateBranchDetails } from "../repo/product-branch-details.repository";
-import { TOKENS } from "../../../lib/di/tokens";
-import { injectable, inject } from "tsyringe";
+import { injectable } from "tsyringe";
+import { NotFoundError } from "../../../lib/auth/error";
+import { findRestaurantById } from "../../restaurant/repository/restaurant.repo";
+import { ProductNotFoundError, InvalidReserveItemsError, outOfStockError, BranchProductDetailsNotFoundError, } from "../errors";
+import { db } from "../../../lib/knex/knex";
+import { insertOutboxEvent } from "../../../lib/events/outbox.repo";
+import { EVENT_TYPES } from "../../../lib/events/event-types";
+import { createProduct, findProductById, findProductsByBranch, findProductsByRestaurant, updateProduct, } from "../repo/product.repository";
+import { findCategoryByName, findCategoriesByRestaurant, createCategory, } from "../repo/category.repository";
+import { findBranchDetails, updateBranchDetails, } from "../repo/product-branch-details.repository";
 let ProductService = class ProductService {
-    restaurantService;
-    constructor(restaurantService) {
-        this.restaurantService = restaurantService;
-    }
-    findCategories = async (restaurantId) => {
-        return findCategoriesByRestaurant(restaurantId);
-    };
-    findByBranch = async (branchId) => {
-        return findProductsByBranch(branchId);
+    create = async (restaurantId, data) => {
+        const restaurant = await findRestaurantById(restaurantId);
+        if (!restaurant)
+            throw NotFoundError;
+        let categoryId = null;
+        if (data.categoryName) {
+            let category = await findCategoryByName(restaurantId, data.categoryName);
+            if (!category) {
+                category = await createCategory(restaurantId, data.categoryName);
+            }
+            categoryId = category.id;
+        }
+        return await createProduct(restaurantId, categoryId, data);
     };
     findByRestaurant = async (restaurantId) => {
-        await this.checkRestaurantAccess(restaurantId);
-        return findProductsByRestaurant(restaurantId);
+        const restaurant = await findRestaurantById(restaurantId);
+        if (!restaurant)
+            throw NotFoundError;
+        return await findProductsByRestaurant(restaurantId);
     };
-    findById = async (productId) => {
-        const product = await findProductById(productId);
+    findCategories = async (restaurantId) => {
+        return await findCategoriesByRestaurant(restaurantId);
+    };
+    findByBranch = async (branchId) => {
+        return await findProductsByBranch(branchId);
+    };
+    findById = async (id) => {
+        const product = await findProductById(id);
         if (!product) {
             throw ProductNotFoundError;
         }
         return product;
     };
-    create = async (restaurantId, data) => {
-        await this.checkRestaurantAccess(restaurantId);
-        let categoryId = null;
-        if (data.categoryName) {
-            const existingCategory = await findCategoryByName(restaurantId, data.categoryName);
-            if (existingCategory) {
-                categoryId = existingCategory.id;
-            }
-            else {
-                const category = await createCategory(restaurantId, data.categoryName);
-                categoryId = category.id;
-            }
-        }
-        const product = await createProduct(restaurantId, categoryId, data);
-        return product;
-    };
     update = async (productId, branchId, data) => {
-        const existingProduct = await findProductById(productId);
-        if (!existingProduct) {
+        const product = await findProductById(productId);
+        if (!product) {
             throw ProductNotFoundError;
         }
-        await this.checkRestaurantAccess(existingProduct.restaurantId);
-        let categoryId;
+        const restaurant = await findRestaurantById(product.restaurantId);
+        if (!restaurant)
+            throw NotFoundError;
+        let categoryId = undefined;
         if (data.categoryName !== undefined) {
-            const existingCategory = await findCategoryByName(existingProduct.restaurantId, data.categoryName);
-            if (existingCategory) {
-                categoryId = existingCategory.id;
+            let category = await findCategoryByName(product.restaurantId, data.categoryName);
+            if (!category) {
+                category = await createCategory(product.restaurantId, data.categoryName);
             }
-            else {
-                const category = await createCategory(existingProduct.restaurantId, data.categoryName);
-                categoryId = category.id;
-            }
+            categoryId = category.id;
         }
-        const product = await updateProduct(productId, categoryId, data);
+        const updatedProduct = await updateProduct(productId, categoryId, data);
         let branchDetails;
-        const hasBranchFields = data.price !== undefined ||
-            data.stock !== undefined ||
-            data.isAvailable !== undefined;
-        if (branchId !== undefined && hasBranchFields) {
-            branchDetails = await findBranchDetails(productId, branchId);
-            if (!branchDetails) {
-                throw BranchProductDetailsNotFoundError;
+        if (branchId !== undefined && (data.price !== undefined || data.stock !== undefined || data.isAvailable !== undefined)) {
+            const trx = await db.transaction();
+            try {
+                const existing = await findBranchDetails(productId, branchId, trx);
+                if (!existing) {
+                    throw BranchProductDetailsNotFoundError;
+                }
+                const entity = await updateBranchDetails(productId, branchId, data, trx);
+                if (data.price !== undefined) {
+                    await insertOutboxEvent(trx, {
+                        aggregateType: "product_branch_details",
+                        aggregateId: `${branchId}:${productId}`,
+                        eventType: EVENT_TYPES.PRODUCT_PRICE_CHANGED,
+                        payload: { branchId, productId, newPrice: entity.price },
+                    });
+                }
+                if (data.stock !== undefined || data.isAvailable !== undefined) {
+                    await insertOutboxEvent(trx, {
+                        aggregateType: "product_branch_details",
+                        aggregateId: `${branchId}:${productId}`,
+                        eventType: EVENT_TYPES.PRODUCT_STOCK_CHANGED,
+                        payload: {
+                            branchId,
+                            productId,
+                            newStock: entity.stock,
+                            isAvailable: entity.isAvailable,
+                        },
+                    });
+                }
+                await trx.commit();
+                branchDetails = entity;
             }
-            branchDetails = await updateBranchDetails(productId, branchId, data);
+            catch (err) {
+                await trx.rollback();
+                throw err;
+            }
         }
         return {
-            product,
-            branchDetails,
+            product: updatedProduct,
+            ...(branchDetails && { branchDetails }),
         };
     };
-    checkRestaurantAccess = async (restaurantId) => {
-        /*
-         * Do not access RestaurantRepository directly here.
-         *
-         * ProductService talks to RestaurantService,
-         * keeping the module boundary clean.
-         * Throws NotFoundError if restaurant does not exist.
-         */
-        await this.restaurantService.findById(restaurantId);
+    findByBranchAndIds = async (branchId, productIds) => {
+        if (productIds.length === 0)
+            return [];
+        const rows = await db("product_branch_details as pbd")
+            .join("products as p", "p.id", "pbd.product_id")
+            .where("pbd.branch_id", branchId)
+            .whereIn("pbd.product_id", productIds)
+            .whereNull("p.deleted_at")
+            .select("pbd.product_id", "p.name", "p.image_url", "pbd.price", "pbd.stock", "pbd.is_available");
+        return rows.map((r) => ({
+            productId: r.product_id,
+            name: r.name,
+            imageUrl: r.image_url,
+            price: r.price,
+            stock: r.stock,
+            isAvailable: r.is_available,
+        }));
+    };
+    /**
+     * Atomically decrements branch stock for each item. Locks the rows FOR UPDATE
+     * and emits product.stock.changed per decrement so order-service invalidates
+     * its cache.
+     */
+    reserveStock = async (branchId, items) => {
+        const sanitized = items
+            .map((it) => ({ productId: Number(it.productId), quantity: Number(it.quantity) }))
+            .filter((it) => Number.isInteger(it.productId) && Number.isInteger(it.quantity) && it.quantity > 0);
+        if (sanitized.length !== items.length) {
+            throw InvalidReserveItemsError;
+        }
+        const productIds = sanitized.map((i) => i.productId);
+        const trx = await db.transaction();
+        try {
+            const rows = await trx("product_branch_details")
+                .where("branch_id", branchId)
+                .whereIn("product_id", productIds)
+                .select("product_id", "stock", "is_available")
+                .forUpdate();
+            const byProduct = new Map();
+            for (const r of rows)
+                byProduct.set(Number(r.product_id), { stock: r.stock, isAvailable: r.is_available });
+            const offending = [];
+            for (const it of sanitized) {
+                const current = byProduct.get(it.productId);
+                if (!current || !current.isAvailable) {
+                    offending.push({ productId: it.productId, requested: it.quantity, available: 0 });
+                    continue;
+                }
+                if (current.stock < it.quantity) {
+                    offending.push({ productId: it.productId, requested: it.quantity, available: current.stock });
+                }
+            }
+            if (offending.length > 0) {
+                throw outOfStockError(offending);
+            }
+            const applied = [];
+            for (const it of sanitized) {
+                const newStock = byProduct.get(it.productId).stock - it.quantity;
+                await trx("product_branch_details")
+                    .where("branch_id", branchId)
+                    .where("product_id", it.productId)
+                    .update({ stock: newStock });
+                applied.push({ productId: it.productId, newStock });
+            }
+            for (const a of applied) {
+                await insertOutboxEvent(trx, {
+                    aggregateType: "product_branch_details",
+                    aggregateId: `${branchId}:${a.productId}`,
+                    eventType: EVENT_TYPES.PRODUCT_STOCK_CHANGED,
+                    payload: { branchId, productId: a.productId, newStock: a.newStock },
+                });
+            }
+            await trx.commit();
+            return { ok: true, applied };
+        }
+        catch (err) {
+            await trx.rollback();
+            throw err;
+        }
     };
 };
 ProductService = __decorate([
-    injectable(),
-    __param(0, inject(TOKENS.RestaurantService)),
-    __metadata("design:paramtypes", [Function])
+    injectable()
 ], ProductService);
 export { ProductService };
 //# sourceMappingURL=product.service.js.map

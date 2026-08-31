@@ -13,6 +13,7 @@ export class Branch {
     createdAt;
     updatedAt;
     deliveryRadius; // km
+    deliveryFee;
     currency;
     commission;
     location;
@@ -31,6 +32,7 @@ export class Branch {
         this.createdAt = data.createdAt ?? new Date();
         this.updatedAt = data.updatedAt ?? new Date();
         this.deliveryRadius = data.deliveryRadius ?? 0;
+        this.deliveryFee = data.deliveryFee ?? 0;
         this.currency = data.currency;
         this.commission = data.commission ?? 0;
     }

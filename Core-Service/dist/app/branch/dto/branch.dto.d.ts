@@ -8,6 +8,7 @@ export declare class CreateBranchDTO {
     opensAt: string;
     closesAt: string;
     deliveryRadius: number;
+    deliveryFee?: number;
     currency: Currency;
 }
 export declare class UpdateBranchDTO {
@@ -19,6 +20,7 @@ export declare class UpdateBranchDTO {
     opensAt?: string;
     closesAt?: string;
     deliveryRadius?: number;
+    deliveryFee?: number;
     currency?: Currency;
     isActive?: boolean;
     acceptOrders?: boolean;

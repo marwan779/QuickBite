@@ -14,6 +14,7 @@ export declare class Branch {
     createdAt: Date;
     updatedAt: Date;
     deliveryRadius: number;
+    deliveryFee: number;
     currency: Currency;
     commission: number;
     location?: String;

@@ -20,7 +20,7 @@ QuickBite is partitioned into specialized microservices communicating via **sync
 
 ```mermaid
 flowchart TD
-    subgraph Clients["Clients"]
+    subgraph Clients["Clients Layer"]
         CA["📱 Customer App"]
         RD["🖥️ Restaurant Dashboard"]
         DA["🛵 Delivery Agent App"]
@@ -29,55 +29,55 @@ flowchart TD
 
     subgraph CoreService["Core-Service (Port: 3000)"]
         direction TB
-        CS_API["Express REST API\n- Auth & User Profiles\n- Restaurant & Branch Catalog\n- Product Menus & Stock\n- RBAC Permission Engine\n- Internal Endpoints (/internal/*)"]
-        CS_OB["Transactional Outbox Worker\n(croner + SKIP LOCKED)"]
-        CS_DB[("PostgreSQL\n(core_service DB)")]
+        CS_API["Express REST API<br/>• Auth & User Profiles<br/>• Restaurant & Branch Catalog<br/>• Product Menus & Stock<br/>• RBAC Permission Engine<br/>• Internal Endpoints"]
+        CS_OB["Transactional Outbox Worker<br/>(croner + SKIP LOCKED)"]
+        CS_DB[("PostgreSQL<br/>(core_service DB)")]
         CS_API <--> CS_DB
-        CS_API -->|Insert Outbox Event| CS_DB
-        CS_OB -->|Drain & Publish| CS_DB
+        CS_API -->|"Insert Outbox Event"| CS_DB
+        CS_OB -->|"Drain & Publish"| CS_DB
     end
 
     subgraph MessageBroker["Message Broker"]
-        RMQ["RabbitMQ Exchange\n(core.events)"]
-        DLQ["Dead Letter Queue\n(order-service.core-events.dlq)"]
+        RMQ["RabbitMQ Exchange<br/>(core.events)"]
+        DLQ["Dead Letter Queue<br/>(order-service.core-events.dlq)"]
     end
 
     subgraph OrderService["Order-Service (Port: 4000)"]
         direction TB
-        OS_HTTP["Express REST API\n- Order Placement & State Machine\n- Kashier v3 Online & COD Payments\n- Driver Dispatch & PostGIS Geo Tracking\n- Restaurant Financial Balance Ledger"]
-        OS_WS["Socket.IO Server (/ws)\n(Live room broadcast)"]
-        OS_SUB["RabbitMQ Consumer\n(order-service.core-events)"]
-        OS_ROUTER["Region Shard Router\n(X-Region -> Knex connection)"]
+        OS_HTTP["Express REST API<br/>• Order Placement & State Machine<br/>• Kashier v3 Online & COD Payments<br/>• Driver Dispatch & PostGIS Tracking<br/>• Restaurant Financial Balance Ledger"]
+        OS_WS["Socket.IO Server (/ws)<br/>(Live room broadcast)"]
+        OS_SUB["RabbitMQ Consumer<br/>(order-service.core-events)"]
+        OS_ROUTER["Region Shard Router<br/>(X-Region Header)"]
         
-        OS_SHARD_EG[("PostgreSQL Shard (EG)")]
-        OS_SHARD_KSA[("PostgreSQL Shard (KSA)")]
-        OS_ARCH[("PostgreSQL Archive\n(Cold storage)")]
+        OS_SHARD_EG[("PostgreSQL Shard<br/>(Egypt - EG)")]
+        OS_SHARD_KSA[("PostgreSQL Shard<br/>(Saudi Arabia - KSA)")]
+        OS_ARCH[("PostgreSQL Archive<br/>(Cold Storage)")]
 
         OS_ROUTER --> OS_SHARD_EG & OS_SHARD_KSA & OS_ARCH
     end
 
     subgraph SharedInfra["Shared Infrastructure"]
-        REDIS[("Redis\n- Cross-Service Cache\n- 24h Idempotency\n- Driver Geo Presence\n- Socket.IO Pub/Sub Adapter\n- Event Deduplication")]
-        KASHIER["Kashier v3 Payment Gateway\n(Sessions & HMAC Webhooks)"]
+        REDIS[("Redis<br/>• Cross-Service Cache<br/>• 24h Idempotency<br/>• Driver Geo Presence<br/>• Socket.IO Pub/Sub Adapter<br/>• Event Deduplication")]
+        KASHIER["Kashier v3 Payment Gateway<br/>(Sessions & HMAC Webhooks)"]
     end
 
     %% Client communication
-    Clients -->|HTTP / REST| CS_API
-    Clients -->|HTTP / REST (X-Region)| OS_HTTP
-    Clients <-->|WebSocket /ws| OS_WS
+    CA & RD & DA & AD -->|"HTTP / REST"| CS_API
+    CA & RD & DA & AD -->|"HTTP / REST (X-Region)"| OS_HTTP
+    CA & RD & DA -->|"WebSocket (/ws)"| OS_WS
 
     %% Inter-service Sync
-    OS_HTTP -->|Sync HTTP (Internal API Key)| CS_API
+    OS_HTTP -->|"Sync HTTP (Internal API Key)"| CS_API
 
     %% Inter-service Async
-    CS_OB -->|Publisher Confirms| RMQ
-    RMQ -->|product.#, branch.#, rbac.#| OS_SUB
-    OS_SUB -->|Cache Invalidation| REDIS
-    OS_SUB -.->|On Handler Failure| DLQ
+    CS_OB -->|"Publisher Confirms"| RMQ
+    RMQ -->|"product.#, branch.#, rbac.#"| OS_SUB
+    OS_SUB -->|"Cache Invalidation"| REDIS
+    OS_SUB -.->|"On Handler Failure"| DLQ
 
     %% Cache & Storage
     OS_HTTP <--> REDIS
-    OS_WS <-->|Pub/Sub Fan-out| REDIS
+    OS_WS <-->|"Pub/Sub Fan-out"| REDIS
     OS_HTTP <--> KASHIER
 ```
 

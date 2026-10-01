@@ -138,7 +138,7 @@ async function handleMessage(
 
     try {
         await handler(msg);
-    } catch (err) {
+    } catch (err) {     
         console.error("[rabbitmq] handler threw:", (err as Error).message);
         msg.nack(false); // false => no requeue, goes to DLQ if configured
     }

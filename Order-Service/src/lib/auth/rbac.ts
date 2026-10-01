@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction} from "express";
+import type {Request, Response, NextFunction } from "express";
 import {NotAuthenticated} from "./errors";
 
 // Role constants kept minimal here; the permission lookup is wired later via a

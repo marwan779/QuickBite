@@ -1,7 +1,7 @@
-import {Request, Response, NextFunction} from "express";
-import {ICacheProvider} from "../../pkg/cache/cache.interface";
+import type {Request, Response, NextFunction} from "express";
 import {container} from "../di/container";
 import {TOKENS} from "../di/tokens";
+import type { ICacheProvider } from "../../pkg/cache/cache.interface";
 
 export function withCache(ttl = 3600, userScoped = false) {
     return async (req: Request, res: Response, next: NextFunction) => {

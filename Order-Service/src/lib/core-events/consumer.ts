@@ -1,8 +1,8 @@
-import {IMessageBroker, ConsumeMessage} from "../../pkg/messaging/message-broker.interface";
 import {env} from "../config/env";
 import {logger} from "../logger/logger";
 import {cacheProvider} from "../cache/init";
-import {CoreEventEnvelope, CoreEventHandler} from "./types";
+import type { CoreEventEnvelope, CoreEventHandler } from "./types";
+import type { ConsumeMessage, IMessageBroker } from "../../pkg/messaging/message-broker.interface";
 
 // Safety window for redelivery (consumer restart, nack-requeue, ops DLQ replay).
 // Longer than realistic redelivery lag, short enough to keep Redis bounded.

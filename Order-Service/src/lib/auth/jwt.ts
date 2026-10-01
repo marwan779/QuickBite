@@ -6,9 +6,9 @@ export interface JWTPayload {
     userId: number;
     role: string;
     email: string;
-    restaurantId?: number;
-    restaurantRole?: string;
-    branchIds?: number[];
+    restaurantId?: number | undefined;
+    restaurantRole?: string | undefined;
+    branchIds?: number[] | undefined;
 }
 
 export function verifyAccessToken(token: string): JWTPayload {

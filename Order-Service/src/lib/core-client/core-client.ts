@@ -2,7 +2,7 @@ import {env} from "../config/env";
 import {AppError} from "../error/AppError";
 import {retry} from "../../pkg/utils/retry";
 import {coreUnavailableError, coreUpstreamError} from "./errors";
-import {CoreClientRequest} from "./types";
+import type { CoreClientRequest } from "./types";
 
 export class CoreClient {
     constructor(private readonly baseUrl: string, private readonly apiKey: string) {}
